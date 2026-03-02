@@ -39,7 +39,7 @@ type Action =
   | { type: 'SET_SURVEY_ANSWERS'; payload: SurveyAnswer[] }
   | { type: 'SET_SAJU_RESULT'; payload: SajuResult }
   | { type: 'SET_INFERRED_HOUR'; payload: InferredHourPillar | null }
-  | { type: 'SET_ANALYSIS_RESULT'; payload: AnalysisResult }
+  | { type: 'SET_ANALYSIS_RESULT'; payload: AnalysisResult | null }
   | { type: 'APPEND_ANALYSIS_TEXT'; payload: string }
   | { type: 'SET_ANALYZING'; payload: boolean }
   | { type: 'RESET' }
@@ -63,7 +63,11 @@ function reducer(state: AppState, action: Action): AppState {
     case 'APPEND_ANALYSIS_TEXT':
       return { ...state, analysisText: state.analysisText + action.payload }
     case 'SET_ANALYZING':
-      return { ...state, isAnalyzing: action.payload, ...(action.payload ? { analysisText: '' } : {}) }
+      return {
+        ...state,
+        isAnalyzing: action.payload,
+        ...(action.payload ? { analysisText: '', analysisResult: null } : {}),
+      }
     case 'RESET':
       return initialState
     default:

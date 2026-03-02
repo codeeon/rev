@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
-import { analyzeSaju, type BirthInfo } from '@workspace/saju-core'
+import { analyzeSaju, isValidBirthInfo, isValidInferredHour } from '@workspace/saju-core'
 
 const LOADING_MESSAGES = [
   '사주 원국을 세우고 있어요...',
@@ -54,12 +54,21 @@ export default function AnalyzingPage() {
     analysisStarted.current = true
 
     async function runAnalysis() {
-      const birthInfo = state.birthInfo as BirthInfo
-      const inferredHour = state.birthTimeKnowledge === 'known' ? undefined : (state.inferredHour ?? undefined)
-      if (!birthInfo.year || !birthInfo.month || !birthInfo.day) {
+      const birthInfoCandidate: unknown = state.birthInfo
+      const inferredHourCandidate: unknown = state.birthTimeKnowledge === 'known' ? undefined : (state.inferredHour ?? undefined)
+
+      if (!isValidBirthInfo(birthInfoCandidate)) {
         router.push('/input')
         return
       }
+
+      if (!isValidInferredHour(inferredHourCandidate)) {
+        router.push('/time')
+        return
+      }
+
+      const birthInfo = birthInfoCandidate
+      const inferredHour = inferredHourCandidate
 
       // Calculate saju locally first
       const sajuResult = analyzeSaju(birthInfo, inferredHour)
