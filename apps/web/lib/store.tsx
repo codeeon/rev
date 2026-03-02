@@ -18,7 +18,7 @@ export interface AppState {
   isAnalyzing: boolean
 }
 
-const initialState: AppState = {
+export const initialState: AppState = {
   step: 0,
   birthInfo: {},
   birthTimeKnowledge: null,
@@ -44,7 +44,7 @@ type Action =
   | { type: 'SET_ANALYZING'; payload: boolean }
   | { type: 'RESET' }
 
-function reducer(state: AppState, action: Action): AppState {
+export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_BIRTH_INFO':
       return { ...state, birthInfo: { ...state.birthInfo, ...action.payload } }
