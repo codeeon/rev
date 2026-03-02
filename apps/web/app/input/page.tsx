@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
@@ -30,7 +30,14 @@ export default function InputPage() {
     return Array.from({ length: getDaysInMonth(year, month, isLunar) }, (_, i) => i + 1)
   }, [year, month, isLunar])
 
-  const isValid = year && month && day && gender
+  const isValidDay = typeof day === 'number' && day >= 1 && day <= days.length
+  const isValid = Boolean(year && month && gender && isValidDay)
+
+  useEffect(() => {
+    if (typeof day === 'number' && day > days.length) {
+      setDay('')
+    }
+  }, [day, days.length])
 
   function handleNext() {
     if (!isValid) return
@@ -100,7 +107,10 @@ export default function InputPage() {
           <div className="flex gap-2">
             <select
               value={year}
-              onChange={(e) => setYear(e.target.value ? Number(e.target.value) : '')}
+              onChange={(e) => {
+                setYear(e.target.value ? Number(e.target.value) : '')
+                setDay('')
+              }}
               className="h-12 flex-1 rounded-xl border border-input bg-card px-3 text-[15px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             >
               <option value="">년</option>
