@@ -1,0 +1,37 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "test:engine": "rm -rf .tmp-test && tsc --outDir .tmp-test --module commonjs --moduleResolution node --target es2020 --resolveJsonModule --esModuleInterop --skipLibCheck --types node lib/engine/scoring.test.ts lib/survey/weight-engine.test.ts && node --test .tmp-test/apps/web/lib/engine/scoring.test.js .tmp-test/apps/web/lib/survey/weight-engine.test.js && rm -rf .tmp-test"
+  },
+  "dependencies": {
+    "@workspace/base-ui": "workspace:*",
+    "@vercel/analytics": "catalog:",
+    "ai": "catalog:",
+    "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "lunar-javascript": "catalog:",
+    "next": "catalog:",
+    "next-themes": "catalog:",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "tailwind-merge": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint/js": "catalog:tooling",
+    "@tailwindcss/postcss": "catalog:tooling",
+    "@types/node": "catalog:tooling",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
+    "postcss": "catalog:tooling",
+    "tailwindcss": "catalog:tooling",
+    "tw-animate-css": "catalog:tooling",
+    "typescript": "catalog:tooling",
+    "typescript-eslint": "catalog:tooling"
+  }
+}

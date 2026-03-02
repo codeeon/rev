@@ -6,6 +6,7 @@ __v0_jsx-dev-runtime.ts
 # Common ignores
 node_modules/
 .next/
+**/.next/
 .env*.local
 .DS_Store
 tsconfig.tsbuildinfo
@@ -13,3 +14,7 @@ tsconfig.tsbuildinfo
 # tmp
 .omc/
 .tmp-test/
+**/.tmp-test/
+.pnpm-store/
+.claude/
+packages/design-systems/base-ui/dist/
