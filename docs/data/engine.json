@@ -1,0 +1,814 @@
+{
+  "engine_settings": {
+    "version": "4.1",
+    "default_temperature": 1.2,
+    "logic_note": "score[zishi] = Σ(question_weight × option_score); prob = softmax(score / T); CUSP uses gap + std over 12 zishi",
+    "zishi_list": [
+      "자시",
+      "축시",
+      "인시",
+      "묘시",
+      "진시",
+      "사시",
+      "오시",
+      "미시",
+      "신시",
+      "유시",
+      "술시",
+      "해시"
+    ],
+    "score_monitoring": {
+      "compute_theoretical_bounds": true,
+      "alert_if_zishi_max_diff_over": 8,
+      "alert_if_role_influence_over": 0.65,
+      "note": "alert thresholds are for monitoring, not hard rejection"
+    },
+    "distribution_monitoring": {
+      "track_top1_mean": true,
+      "track_top2_gap_mean": true,
+      "target_top1_band": [0.5, 0.65]
+    },
+    "cusp_logic": {
+      "gap_threshold": 0.05,
+      "min_score_std": 0.8,
+      "std_scope": "12_zishi_softmax_scores"
+    }
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "structure_role": "noise_reduction",
+      "category": "Warm-up",
+      "question_weight": 0.8,
+      "text": "아침에 눈을 떴을 때, 나의 모습은?",
+      "options": [
+        {
+          "text": "바로 일어나서 활동해요",
+          "score_map": {
+            "인시": 2,
+            "묘시": 2,
+            "진시": 2,
+            "사시": 1
+          }
+        },
+        {
+          "text": "한참 멍하니 있어요",
+          "score_map": {
+            "신시": 1,
+            "유시": 1,
+            "술시": 1,
+            "해시": 2,
+            "축시": 2
+          }
+        },
+        {
+          "text": "천천히 예열해요",
+          "score_map": {
+            "미시": 2,
+            "오시": 1,
+            "진시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "structure_role": "noise_reduction",
+      "category": "Warm-up",
+      "question_weight": 0.8,
+      "text": "커피(카페인)가 가장 간절하게 당기는 순간은?",
+      "options": [
+        {
+          "text": "오늘 하루를 시작하기 직전",
+          "score_map": {
+            "인시": 1,
+            "묘시": 2,
+            "진시": 1
+          }
+        },
+        {
+          "text": "점심 먹고 나른해지는 오후",
+          "score_map": {
+            "미시": 2,
+            "신시": 1,
+            "오시": 1
+          }
+        },
+        {
+          "text": "해 질 녘, 에너지가 떨어질 때",
+          "score_map": {
+            "유시": 2,
+            "술시": 2
+          }
+        },
+        {
+          "text": "늦은 밤까지 집중해야 할 때",
+          "score_map": {
+            "해시": 2,
+            "자시": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q3",
+      "structure_role": "noise_reduction",
+      "category": "Warm-up",
+      "question_weight": 0.8,
+      "text": "밥 먹고 나서 특히 졸음이 쏟아지는 때가 있다면?",
+      "options": [
+        {
+          "text": "점심 직후",
+          "score_map": {
+            "미시": 2,
+            "오시": 1,
+            "진시": 1
+          }
+        },
+        {
+          "text": "저녁 직후",
+          "score_map": {
+            "술시": 2,
+            "유시": 1,
+            "미시": 1
+          }
+        },
+        {
+          "text": "야식이나 늦은 밤 식사 후",
+          "score_map": {
+            "축시": 2,
+            "자시": 1,
+            "해시": 1
+          }
+        },
+        {
+          "text": "식곤증은 거의 없어요",
+          "score_map": {
+            "진시": 1,
+            "사시": 1,
+            "신시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q4",
+      "structure_role": "core",
+      "category": "Life-Rhythm",
+      "question_weight": 1.5,
+      "text": "머리가 가장 또렷해지고 '나답다'고 느껴지는 시간은?",
+      "options": [
+        {
+          "text": "밤, 조용할 때",
+          "score_map": {
+            "해시": 4,
+            "자시": 4,
+            "축시": 1
+          }
+        },
+        {
+          "text": "새벽 공기",
+          "score_map": {
+            "인시": 4,
+            "묘시": 4
+          }
+        },
+        {
+          "text": "오전 시간",
+          "score_map": {
+            "진시": 4,
+            "사시": 4
+          }
+        },
+        {
+          "text": "오후 시간",
+          "score_map": {
+            "오시": 3,
+            "미시": 4,
+            "신시": 3
+          }
+        },
+        {
+          "text": "해질녘 저녁",
+          "score_map": {
+            "유시": 4,
+            "술시": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q5",
+      "structure_role": "core",
+      "category": "Life-Rhythm",
+      "question_weight": 1.5,
+      "text": "밤 11시 이후, 나의 에너지는 보통 어떤가요?",
+      "options": [
+        {
+          "text": "오히려 또렷해지고 살아나요",
+          "score_map": {
+            "자시": 3,
+            "해시": 2,
+            "오시": -3,
+            "미시": -3
+          }
+        },
+        {
+          "text": "눈꺼풀이 무거워 바로 잠들어요",
+          "score_map": {
+            "자시": -6,
+            "해시": -4,
+            "인시": 2,
+            "묘시": 2,
+            "축시": 2
+          }
+        },
+        {
+          "text": "그때그때 달라요",
+          "score_map": {
+            "진시": 1,
+            "술시": 1,
+            "미시": 1,
+            "축시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q6",
+      "structure_role": "core",
+      "category": "Life-Rhythm",
+      "question_weight": 1.2,
+      "text": "유독 기운이 안 붙고 몸이 무겁게 느껴지는 때는?",
+      "options": [
+        {
+          "text": "오전 시간대",
+          "score_map": {
+            "인시": -3,
+            "묘시": -3,
+            "진시": -1
+          }
+        },
+        {
+          "text": "오후 시간대",
+          "score_map": {
+            "오시": -3,
+            "미시": -3,
+            "신시": -1
+          }
+        },
+        {
+          "text": "저녁/밤 시간대",
+          "score_map": {
+            "유시": -3,
+            "술시": -3,
+            "해시": -3,
+            "자시": -3
+          }
+        },
+        {
+          "text": "딱히 그런 시간은 없어요",
+          "score_map": {}
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "structure_role": "core",
+      "category": "Life-Rhythm",
+      "question_weight": 1.2,
+      "text": "몸이 먼저 '잠깐 멈춰, 쉬어야 해'라고 신호를 보내는 시간은?",
+      "options": [
+        {
+          "text": "오전 10시쯤",
+          "score_map": {
+            "사시": -3,
+            "진시": -1
+          }
+        },
+        {
+          "text": "오후 3시쯤",
+          "score_map": {
+            "신시": -3,
+            "미시": -1
+          }
+        },
+        {
+          "text": "밤 9시 이후",
+          "score_map": {
+            "해시": -3,
+            "술시": -1
+          }
+        },
+        {
+          "text": "뚜렷하게 느껴지는 순간은 없어요",
+          "score_map": {}
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "structure_role": "fine_tune",
+      "category": "Life-Rhythm",
+      "question_weight": 1,
+      "text": "나도 모르게 마음이 조금 '뾰족'해지거나 예민해지는 시간은?",
+      "options": [
+        {
+          "text": "밤, 감수성이 넘칠 때",
+          "score_map": {
+            "해시": 2,
+            "자시": 2,
+            "축시": 1
+          }
+        },
+        {
+          "text": "오전, 사소한 일에 날카로울 때",
+          "score_map": {
+            "묘시": 2,
+            "진시": 1,
+            "인시": 1
+          }
+        },
+        {
+          "text": "오후, 기복이 생길 때",
+          "score_map": {
+            "미시": 2,
+            "신시": 1,
+            "오시": 1
+          }
+        },
+        {
+          "text": "시간대 영향은 거의 없어요",
+          "score_map": {}
+        }
+      ]
+    },
+    {
+      "id": "Q9",
+      "structure_role": "fine_tune",
+      "category": "Life-Rhythm",
+      "question_weight": 1.2,
+      "text": "나는 계절의 변화를 어디서 가장 먼저 느끼나요?",
+      "options": [
+        {
+          "text": "여름의 열기가 유독 버거워요",
+          "score_map": {
+            "사시": -2,
+            "오시": -3,
+            "미시": -2,
+            "자시": 2,
+            "해시": 2
+          }
+        },
+        {
+          "text": "겨울의 한기가 몸속까지 파고들어요",
+          "score_map": {
+            "해시": -2,
+            "자시": -3,
+            "축시": -2,
+            "오시": 2,
+            "사시": 2
+          }
+        },
+        {
+          "text": "비교적 무던하게 적응해요",
+          "score_map": {
+            "진시": 2,
+            "술시": 2,
+            "미시": 2,
+            "축시": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "structure_role": "fine_tune",
+      "category": "Behavior",
+      "question_weight": 1,
+      "text": "큰 프로젝트나 일을 끝냈을 때, 나는 보통...",
+      "options": [
+        {
+          "text": "부족한 건 없었나 다시 훑어봐요",
+          "score_map": {
+            "유시": 2,
+            "축시": 2,
+            "신시": 1
+          }
+        },
+        {
+          "text": "고생했다! 하고 바로 다음 일을 생각해요",
+          "score_map": {
+            "인시": 2,
+            "사시": 2,
+            "오시": 1
+          }
+        },
+        {
+          "text": "사람들이 어떻게 봐줄지 반응을 살피게 돼요",
+          "score_map": {
+            "묘시": 2,
+            "진시": 2,
+            "미시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q11",
+      "structure_role": "fine_tune",
+      "category": "Behavior",
+      "question_weight": 1,
+      "text": "실패를 겪었을 때, 다시 일어서는 나의 속도는?",
+      "options": [
+        {
+          "text": "자고 일어나면 비교적 빨리 털어내요",
+          "score_map": {
+            "인시": 2,
+            "진시": 1,
+            "오시": 1
+          }
+        },
+        {
+          "text": "왜 실패했는지 원인부터 철저히 분석해요",
+          "score_map": {
+            "유시": 2,
+            "신시": 1,
+            "술시": 1
+          }
+        },
+        {
+          "text": "후유증이 남아서 추스르는 시간이 필요해요",
+          "score_map": {
+            "자시": 2,
+            "해시": 2,
+            "묘시": 1
+          }
+        },
+        {
+          "text": "그럴 수도 있지 하고 담담하게 넘겨요",
+          "score_map": {
+            "술시": 2,
+            "미시": 2,
+            "축시": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q12",
+      "structure_role": "fine_tune",
+      "category": "Behavior",
+      "question_weight": 1.2,
+      "text": "예상치 못한 돌발 상황이 생기면, 나의 첫 번째 반응은?",
+      "options": [
+        {
+          "text": "일단 몸으로 부딪히며 해결책을 찾아요",
+          "score_map": {
+            "인시": 2,
+            "묘시": 1,
+            "오시": 2,
+            "신시": 1
+          }
+        },
+        {
+          "text": "한 발 물러서서 상황을 가만히 지켜봐요",
+          "score_map": {
+            "진시": 2,
+            "미시": 2,
+            "술시": 2,
+            "축시": 2
+          }
+        },
+        {
+          "text": "속으로 수많은 경우의 수를 생각해요",
+          "score_map": {
+            "해시": 2,
+            "자시": 2,
+            "사시": 1,
+            "유시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q13",
+      "structure_role": "fine_tune",
+      "category": "Behavior",
+      "question_weight": 1,
+      "text": "갈등이 생기면, 나를 지키기 위해 선택하는 방식은?",
+      "options": [
+        {
+          "text": "불편한 관계는 조용히 거리를 둬요",
+          "score_map": {
+            "유시": 2,
+            "신시": 1,
+            "자시": 1
+          }
+        },
+        {
+          "text": "중간에서 어떻게든 풀어보려 노력해요",
+          "score_map": {
+            "진시": 2,
+            "미시": 2,
+            "축시": 2,
+            "술시": 2
+          }
+        },
+        {
+          "text": "그때그때 느낀 감정을 바로 이야기해요",
+          "score_map": {
+            "오시": 2,
+            "사시": 1,
+            "인시": 1
+          }
+        },
+        {
+          "text": "일단 입을 닫고 혼자서 생각을 정리해요",
+          "score_map": {
+            "해시": 2,
+            "자시": 2,
+            "축시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q14",
+      "structure_role": "fine_tune",
+      "category": "Behavior",
+      "question_weight": 1,
+      "text": "나보다 어린 사람이나 후배를 대할 때 나는?",
+      "options": [
+        {
+          "text": "세심하게 챙겨주고 보호해주려 해요",
+          "score_map": {
+            "인시": 2,
+            "묘시": 2,
+            "해시": 1,
+            "진시": 1
+          }
+        },
+        {
+          "text": "서로 경쟁하면서 함께 성장하길 원해요",
+          "score_map": {
+            "신시": 2,
+            "유시": 1,
+            "오시": 1
+          }
+        },
+        {
+          "text": "각자의 자유를 최대한 존중해줘요",
+          "score_map": {
+            "자시": 2,
+            "해시": 1,
+            "사시": 1
+          }
+        },
+        {
+          "text": "지켜야 할 기준을 명확히 알려줘요",
+          "score_map": {
+            "술시": 2,
+            "축시": 2,
+            "진시": 2,
+            "미시": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q15",
+      "structure_role": "fine_tune",
+      "category": "Deep-Inner",
+      "question_weight": 1.2,
+      "text": "혼자 가만히 있을 때, 생각은 주로 어디로 흘러가나요?",
+      "options": [
+        {
+          "text": "[상상] 일어나지 않은 흥미로운 일들",
+          "score_map": {
+            "해시": 2,
+            "인시": 1,
+            "묘시": 1
+          }
+        },
+        {
+          "text": "[계획] 앞으로 해야 할 일과 시나리오",
+          "score_map": {
+            "사시": 2,
+            "진시": 2,
+            "신시": 1
+          }
+        },
+        {
+          "text": "[현실] 오늘 당장 해결해야 할 고민들",
+          "score_map": {
+            "축시": 2,
+            "미시": 2,
+            "술시": 2,
+            "진시": 2
+          }
+        },
+        {
+          "text": "[추억] 예전 기억이나 그리운 사람들",
+          "score_map": {
+            "자시": 2,
+            "유시": 1,
+            "술시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q16",
+      "structure_role": "fine_tune",
+      "category": "Deep-Inner",
+      "question_weight": 1.2,
+      "text": "남들은 잘 모르지만, 내 안에 자리 잡은 단단한 힘은?",
+      "options": [
+        {
+          "text": "은근히 지고 싶지 않은 승부욕",
+          "score_map": {
+            "인시": 2,
+            "오시": 1,
+            "신시": 1
+          }
+        },
+        {
+          "text": "혼자 있는 시간을 견디는 단단함",
+          "score_map": {
+            "자시": 2,
+            "축시": 2,
+            "해시": 1
+          }
+        },
+        {
+          "text": "상황을 내 주도하에 두려는 추진력",
+          "score_map": {
+            "사시": 2,
+            "진시": 1,
+            "미시": 1
+          }
+        },
+        {
+          "text": "손해 보더라도 돕고 싶은 따뜻함",
+          "score_map": {
+            "묘시": 2,
+            "해시": 1,
+            "미시": 1
+          }
+        },
+        {
+          "text": "핵심을 날카롭게 꿰뚫어 보는 통찰력",
+          "score_map": {
+            "유시": 2,
+            "신시": 1,
+            "술시": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q17",
+      "structure_role": "fine_tune",
+      "category": "Deep-Inner",
+      "question_weight": 1.2,
+      "text": "지금까지 살아오면서 반복된 특징이 있다면?",
+      "options": [
+        {
+          "text": "환경 변화나 이동이 꽤 잦은 편이었어요",
+          "score_map": {
+            "인시": 1,
+            "신시": 1,
+            "사시": 1,
+            "해시": 1
+          }
+        },
+        {
+          "text": "한 자리에서 꾸준히 오랫동안 머물렀어요",
+          "score_map": {
+            "축시": 2,
+            "진시": 2,
+            "미시": 2,
+            "술시": 2
+          }
+        },
+        {
+          "text": "인간관계의 폭이 넓어졌다 좁아졌다 해요",
+          "score_map": {
+            "자시": 1,
+            "오시": 1,
+            "묘시": 1,
+            "유시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q18",
+      "structure_role": "closing",
+      "category": "Closing",
+      "question_weight": 1,
+      "text": "내가 꿈꾸는 삶의 방향은 어떤 모습인가요?",
+      "options": [
+        {
+          "text": "나만의 공간에서 전문성을 깊게 쌓는 삶",
+          "score_map": {
+            "유시": 1,
+            "축시": 2,
+            "해시": 1
+          }
+        },
+        {
+          "text": "사람들에게 좋은 영향력을 넓히는 삶",
+          "score_map": {
+            "인시": 1,
+            "사시": 1,
+            "오시": 1
+          }
+        },
+        {
+          "text": "안정적인 울타리 안에서 정착하는 삶",
+          "score_map": {
+            "미시": 2,
+            "술시": 2,
+            "진시": 2,
+            "축시": 1
+          }
+        },
+        {
+          "text": "눈에 보이는 뚜렷한 업적을 남기는 삶",
+          "score_map": {
+            "신시": 1,
+            "진시": 1,
+            "오시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q19",
+      "structure_role": "closing",
+      "category": "Closing",
+      "question_weight": 1,
+      "text": "나의 '인생 전성기'는 언제일 것 같나요?",
+      "options": [
+        {
+          "text": "시작부터 남들보다 빠르게 치고 나가는 시기",
+          "score_map": {
+            "인시": 1,
+            "묘시": 1,
+            "진시": 1
+          }
+        },
+        {
+          "text": "한창 활동하며 영향력을 넓히는 시기",
+          "score_map": {
+            "사시": 1,
+            "오시": 1,
+            "미시": 1
+          }
+        },
+        {
+          "text": "뒤로 갈수록 안정되고 결실을 보는 시기",
+          "score_map": {
+            "신시": 1,
+            "유시": 1,
+            "해시": 1,
+            "축시": 2,
+            "술시": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q20",
+      "structure_role": "closing",
+      "category": "Closing",
+      "question_weight": 1,
+      "text": "나를 가장 잘 설명하는 문장은?",
+      "options": [
+        {
+          "text": "큰 꿈을 꾸지만, 발은 현실을 딛고 있어요",
+          "score_map": {
+            "진시": 2,
+            "술시": 2,
+            "미시": 2,
+            "축시": 2
+          }
+        },
+        {
+          "text": "직접 눈으로 확인한 데이터만 믿는 편이에요",
+          "score_map": {
+            "유시": 1,
+            "신시": 1,
+            "사시": 1
+          }
+        },
+        {
+          "text": "둘 다 나를 설명하기엔 조금 부족해요",
+          "score_map": {}
+        }
+      ]
+    }
+  ]
+}
