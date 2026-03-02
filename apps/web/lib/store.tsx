@@ -35,10 +35,10 @@ const initialState: AppState = {
 type Action =
   | { type: 'SET_BIRTH_INFO'; payload: Partial<BirthInfo> }
   | { type: 'SET_BIRTH_TIME_KNOWLEDGE'; payload: 'known' | 'unknown' | 'approximate' }
-  | { type: 'SET_APPROXIMATE_RANGE'; payload: { start: number; end: number } }
+  | { type: 'SET_APPROXIMATE_RANGE'; payload: { start: number; end: number } | null }
   | { type: 'SET_SURVEY_ANSWERS'; payload: SurveyAnswer[] }
   | { type: 'SET_SAJU_RESULT'; payload: SajuResult }
-  | { type: 'SET_INFERRED_HOUR'; payload: InferredHourPillar }
+  | { type: 'SET_INFERRED_HOUR'; payload: InferredHourPillar | null }
   | { type: 'SET_ANALYSIS_RESULT'; payload: AnalysisResult }
   | { type: 'APPEND_ANALYSIS_TEXT'; payload: string }
   | { type: 'SET_ANALYZING'; payload: boolean }

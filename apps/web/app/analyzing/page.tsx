@@ -56,13 +56,14 @@ export default function AnalyzingPage() {
 
     async function runAnalysis() {
       const birthInfo = state.birthInfo as BirthInfo
+      const inferredHour = state.birthTimeKnowledge === 'known' ? undefined : (state.inferredHour ?? undefined)
       if (!birthInfo.year || !birthInfo.month || !birthInfo.day) {
         router.push('/input')
         return
       }
 
       // Calculate saju locally first
-      const sajuResult = analyzeSaju(birthInfo, state.inferredHour ?? undefined)
+      const sajuResult = analyzeSaju(birthInfo, inferredHour)
       dispatch({ type: 'SET_SAJU_RESULT', payload: sajuResult })
       dispatch({ type: 'SET_ANALYZING', payload: true })
 
@@ -73,7 +74,7 @@ export default function AnalyzingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             birthInfo,
-            inferredHour: state.inferredHour,
+            inferredHour,
             surveyAnswers: state.surveyAnswers,
           }),
         })

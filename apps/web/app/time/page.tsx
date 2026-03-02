@@ -43,6 +43,9 @@ function TimePageContent() {
 
   function handleExactSubmit() {
     if (typeof hour !== 'number') return
+    dispatch({ type: 'SET_INFERRED_HOUR', payload: null })
+    dispatch({ type: 'SET_SURVEY_ANSWERS', payload: [] })
+    dispatch({ type: 'SET_APPROXIMATE_RANGE', payload: null })
     dispatch({
       type: 'SET_BIRTH_INFO',
       payload: { hour, minute },
