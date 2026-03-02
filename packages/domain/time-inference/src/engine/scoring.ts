@@ -1,6 +1,6 @@
+import { BRANCH_KR } from '@workspace/saju-core'
 import { ENGINE_SETTINGS, ZISHI_LIST, QUESTION_MAP, CORE_QUESTIONS } from './loader'
 import { ZISHI_TO_BRANCH } from '../survey/zishi-mapping'
-import { BRANCH_KR } from '../saju/constants'
 import type {
   SurveyAnswer,
   ZishiName,
@@ -66,7 +66,6 @@ function applyApproximateRangePrior(
   return adjusted
 }
 
-// Step 1: 원시 점수 누적
 export function calculateRawScores(answers: SurveyAnswer[]): Record<ZishiName, number> {
   const scores = initZeroScores()
 
@@ -77,7 +76,6 @@ export function calculateRawScores(answers: SurveyAnswer[]): Record<ZishiName, n
     const option = question.options[answer.optionIndex]
     if (!option) continue
 
-    // question_weight는 문항별로 직접 읽음 (role 기반 고정 상수 사용 금지)
     for (const [zishi, score] of Object.entries(option.score_map) as [ZishiName, number][]) {
       scores[zishi] += question.question_weight * score
     }
@@ -86,7 +84,6 @@ export function calculateRawScores(answers: SurveyAnswer[]): Record<ZishiName, n
   return scores
 }
 
-// Step 2: Softmax 변환 (수치 안정성을 위해 max 빼기 적용)
 export function softmax(
   scores: Record<ZishiName, number>,
   temperature: number = ENGINE_SETTINGS.default_temperature
@@ -109,7 +106,6 @@ export function softmax(
   return probs
 }
 
-// Step 3: CUSP 판정
 export function evaluateCusp(probs: Record<ZishiName, number>): CuspResult {
   const sorted = ZISHI_LIST.map(z => probs[z]).sort((a, b) => b - a)
   const gap = sorted[0] - sorted[1]
@@ -127,7 +123,6 @@ export function evaluateCusp(probs: Record<ZishiName, number>): CuspResult {
   }
 }
 
-// 상위 N개 후보 추출
 export function getTopCandidates(
   probs: Record<ZishiName, number>,
   rawScores: Record<ZishiName, number>,
@@ -146,7 +141,6 @@ export function getTopCandidates(
     .slice(0, n)
 }
 
-// 모니터링 지표 계산
 export function calculateMonitoring(
   rawScores: Record<ZishiName, number>,
   probs: Record<ZishiName, number>,
@@ -155,9 +149,11 @@ export function calculateMonitoring(
   const rawVals = ZISHI_LIST.map(z => rawScores[z])
   const zishiMaxDiff = Math.max(...rawVals) - Math.min(...rawVals)
 
-  // role별 절대 기여합
   const roleAbsSum: Record<StructureRole, number> = {
-    noise_reduction: 0, core: 0, fine_tune: 0, closing: 0,
+    noise_reduction: 0,
+    core: 0,
+    fine_tune: 0,
+    closing: 0,
   }
   let totalAbsSum = 0
 
@@ -167,9 +163,7 @@ export function calculateMonitoring(
     const option = question.options[answer.optionIndex]
     if (!option) continue
 
-    const absContrib = Object.values(option.score_map).reduce(
-      (s, v) => s + Math.abs(question.question_weight * (v ?? 0)), 0
-    )
+    const absContrib = Object.values(option.score_map).reduce((s, v) => s + Math.abs(question.question_weight * (v ?? 0)), 0)
     roleAbsSum[question.structure_role] += absContrib
     totalAbsSum += absContrib
   }
@@ -186,14 +180,10 @@ export function calculateMonitoring(
   const top2Gap = sortedProbs[0] - sortedProbs[1]
 
   const probMean = 1 / ZISHI_LIST.length
-  const stdSoftmax = Math.sqrt(
-    ZISHI_LIST.map(z => probs[z]).reduce((s, v) => s + (v - probMean) ** 2, 0) / ZISHI_LIST.length
-  )
+  const stdSoftmax = Math.sqrt(ZISHI_LIST.map(z => probs[z]).reduce((s, v) => s + (v - probMean) ** 2, 0) / ZISHI_LIST.length)
 
   const rawMean = rawVals.reduce((s, v) => s + v, 0) / rawVals.length
-  const stdRawScore = Math.sqrt(
-    rawVals.reduce((s, v) => s + (v - rawMean) ** 2, 0) / rawVals.length
-  )
+  const stdRawScore = Math.sqrt(rawVals.reduce((s, v) => s + (v - rawMean) ** 2, 0) / rawVals.length)
 
   const { alert_if_zishi_max_diff_over, alert_if_role_influence_over } = ENGINE_SETTINGS.score_monitoring
   const [bandLow, bandHigh] = ENGINE_SETTINGS.distribution_monitoring.target_top1_band
@@ -213,7 +203,6 @@ export function calculateMonitoring(
   }
 }
 
-// 미러링 신호 추출 — core 문항(Q4~Q7) 중 top1 기여 상위 2~3개
 export function extractMirroringSignals(
   answers: SurveyAnswer[],
   top1Zishi: ZishiName,
@@ -242,7 +231,6 @@ export function extractMirroringSignals(
     .slice(0, maxCount)
 }
 
-// 전체 파이프라인 — 외부 진입점
 export function inferZishi(answers: SurveyAnswer[], options?: InferenceOptions): SurveyResult {
   const baseRawScores = calculateRawScores(answers)
   const rawScores = options?.approximateRange
@@ -255,7 +243,6 @@ export function inferZishi(answers: SurveyAnswer[], options?: InferenceOptions):
   const mirroringSignals = extractMirroringSignals(answers, top1.zishi)
   const monitoring = calculateMonitoring(rawScores, probs, answers)
 
-  // 모니터링 알림 로그
   if (Object.values(monitoring.alerts).some(Boolean)) {
     console.warn('[Engine Monitor]', JSON.stringify(monitoring, null, 2))
   }

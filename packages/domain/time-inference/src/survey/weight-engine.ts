@@ -1,12 +1,10 @@
+import { BRANCH_KR, type InferredHourPillar } from '@workspace/saju-core'
 import { inferZishi } from '../engine/scoring'
 import { ZISHI_TO_BRANCH } from './zishi-mapping'
-import { BRANCH_KR } from '../saju/constants'
 import type { SurveyResult } from './types'
-import type { InferredHourPillar } from '../saju/types'
 
 export { inferZishi }
 
-// SurveyResult → InferredHourPillar 변환 (store/saju 레이어 연결용)
 export function toInferredHourPillar(result: SurveyResult): InferredHourPillar {
   const branch = ZISHI_TO_BRANCH[result.inferredZishi]
   return {

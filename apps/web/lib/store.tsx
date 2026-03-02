@@ -1,8 +1,8 @@
 'use client'
 
 import { createContext, useContext, useReducer, type ReactNode } from 'react'
-import type { BirthInfo, SajuResult, AnalysisResult, InferredHourPillar } from './saju/types'
-import type { SurveyAnswer } from './survey/types'
+import type { BirthInfo, SajuResult, AnalysisResult, InferredHourPillar } from '@workspace/saju-core'
+import type { SurveyAnswer } from '@workspace/time-inference'
 
 // State
 export interface AppState {

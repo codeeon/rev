@@ -19,25 +19,16 @@ function zeroScores(): Record<ZishiName, number> {
   }, {} as Record<ZishiName, number>)
 }
 
-// Doc mapping:
-// - docs/migration/engine-v41-production-design.md (3) Production Question Set (20)
-// - docs/migration/engine-implementation-design.md (2) 전체 질문 목록 (20문항)
 test('engine question set is fixed to 20 (Q1~Q20)', () => {
   assert.equal(ENGINE_QUESTIONS.length, 20)
   assert.equal(ENGINE_QUESTIONS[0].id, 'Q1')
   assert.equal(ENGINE_QUESTIONS[19].id, 'Q20')
 })
 
-// Doc mapping:
-// - engine-v41-production-design.md (5.1) score[z] += question_weight * option.score_map[z]
-// - engine-implementation-design.md (3 Step 1) 원시 점수 누적 공식
 test('calculateRawScores uses question_weight x score_map (documented formula)', () => {
   const answers: SurveyAnswer[] = [
-    // Q4 option 2: 오전 시간 => 진시/사시 +4 each, weight 1.5 => +6 each
     { questionId: 'Q4', optionIndex: 2 },
-    // Q5 option 1: 바로 잠들어요 => 자시 -6, 인시 +2 (weight 1.5)
     { questionId: 'Q5', optionIndex: 1 },
-    // invalid entries should be ignored
     { questionId: 'UNKNOWN', optionIndex: 0 },
     { questionId: 'Q1', optionIndex: 999 },
   ]
@@ -49,14 +40,10 @@ test('calculateRawScores uses question_weight x score_map (documented formula)',
   assert.equal(raw.인시, 3)
 })
 
-// Doc mapping:
-// - engine-v41-production-design.md (5.2) Softmax Probability, T=1.2, numerical stability
-// - engine-implementation-design.md (3 Step 2) max-shift softmax
 test('softmax uses temperature and max-shift formula correctly', () => {
   const scores = zeroScores()
   scores.자시 = 3
   scores.축시 = 1
-  // others = 0
 
   const probs = softmax(scores, 1.2)
   const maxVal = 3
@@ -73,8 +60,6 @@ test('softmax uses temperature and max-shift formula correctly', () => {
   assert.ok(Math.abs(sum - 1) < 1e-12)
 })
 
-// Doc mapping:
-// - engine-implementation-design.md (15 단위 검증) all-zero -> 균등 분포
 test('softmax returns uniform distribution when all raw scores are zero', () => {
   const probs = softmax(zeroScores())
   for (const z of ZISHI_LIST) {
@@ -82,11 +67,7 @@ test('softmax returns uniform distribution when all raw scores are zero', () => 
   }
 })
 
-// Doc mapping:
-// - engine-v41-production-design.md (5.3) CUSP: gap < 0.05 and std > 0.8
-// - engine-implementation-design.md (3 Step 3) CUSP AND 조건
 test('evaluateCusp applies gap threshold AND std threshold', () => {
-  // realistic near-tie probability distribution (sum=1)
   const probs = zeroScores()
   probs.자시 = 0.26
   probs.축시 = 0.25
@@ -99,17 +80,14 @@ test('evaluateCusp applies gap threshold AND std threshold', () => {
   assert.ok(cusp.stdDev < 0.8)
 })
 
-// Doc mapping:
-// - engine-v41-production-design.md (9) core 2~3개 미러링 근거
-// - engine-implementation-design.md (6) core-only, zero-impact 제외, 절대값 정렬
 test('extractMirroringSignals keeps only core questions, excludes zero impact, sorts by absolute impact', () => {
   const answers: SurveyAnswer[] = [
-    { questionId: 'Q1', optionIndex: 0 }, // non-core
-    { questionId: 'Q4', optionIndex: 2 }, // top1=사시 기준 +6
-    { questionId: 'Q5', optionIndex: 0 }, // top1=사시 기준 -4.5
-    { questionId: 'Q6', optionIndex: 3 }, // empty score_map => 0 impact
-    { questionId: 'Q7', optionIndex: 0 }, // top1=사시 기준 -3.6
-    { questionId: 'Q8', optionIndex: 1 }, // non-core
+    { questionId: 'Q1', optionIndex: 0 },
+    { questionId: 'Q4', optionIndex: 2 },
+    { questionId: 'Q5', optionIndex: 0 },
+    { questionId: 'Q6', optionIndex: 3 },
+    { questionId: 'Q7', optionIndex: 0 },
+    { questionId: 'Q8', optionIndex: 1 },
   ]
   const signals = extractMirroringSignals(answers, '사시', 3)
 
@@ -123,9 +101,6 @@ test('extractMirroringSignals keeps only core questions, excludes zero impact, s
   assert.ok(Math.abs(signals[0].impactScore) >= Math.abs(signals[1].impactScore))
 })
 
-// Doc mapping:
-// - engine-v41-production-design.md (8) Monitoring and Guardrails
-// - engine-implementation-design.md (5) 모니터링 Guardrails
 test('calculateMonitoring computes role influence and guardrail alerts', () => {
   const answers: SurveyAnswer[] = [
     { questionId: 'Q4', optionIndex: 2 },
@@ -137,7 +112,6 @@ test('calculateMonitoring computes role influence and guardrail alerts', () => {
   const probs = softmax(raw)
   const monitoring = calculateMonitoring(raw, probs, answers)
 
-  // all answers are core questions -> core influence should be 1
   assert.equal(monitoring.roleInfluence.core, 1)
   assert.equal(monitoring.roleInfluence.noise_reduction, 0)
   assert.equal(monitoring.roleInfluence.fine_tune, 0)
@@ -148,15 +122,12 @@ test('calculateMonitoring computes role influence and guardrail alerts', () => {
   assert.ok(typeof monitoring.alerts.top1OutOfBand === 'boolean')
 })
 
-// Doc mapping:
-// - engine-v41-production-design.md (7) confidence: top1 probability * 100 (rounded)
-// - engine-implementation-design.md (4) confidence = Top1_prob × 100
 test('inferZishi confidence follows top1 probability * 100 (rounded)', () => {
   const answers: SurveyAnswer[] = [
-    { questionId: 'Q4', optionIndex: 1 }, // 인시/묘시 strongly positive
-    { questionId: 'Q5', optionIndex: 1 }, // 자시/해시 negative, 인시/묘시 positive
-    { questionId: 'Q6', optionIndex: 3 }, // no contribution
-    { questionId: 'Q7', optionIndex: 3 }, // no contribution
+    { questionId: 'Q4', optionIndex: 1 },
+    { questionId: 'Q5', optionIndex: 1 },
+    { questionId: 'Q6', optionIndex: 3 },
+    { questionId: 'Q7', optionIndex: 3 },
   ]
 
   const result = inferZishi(answers)
@@ -164,9 +135,6 @@ test('inferZishi confidence follows top1 probability * 100 (rounded)', () => {
   assert.equal(result.confidence, expected)
 })
 
-// Doc mapping:
-// - engine-v41-production-design.md (7, 9, 8) result contract + mirroring + monitoring
-// - engine-implementation-design.md (3, 6, 5) 파이프라인 통합 결과
 test('inferZishi end-to-end: returns top candidates, cusp, mirroring, monitoring', () => {
   const answers: SurveyAnswer[] = [{ questionId: 'Q4', optionIndex: 1 }, { questionId: 'Q5', optionIndex: 1 }]
   const result = inferZishi(answers)

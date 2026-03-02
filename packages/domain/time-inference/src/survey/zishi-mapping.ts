@@ -1,4 +1,4 @@
-import type { EarthlyBranch } from '../saju/types'
+import type { EarthlyBranch } from '@workspace/saju-core'
 import type { ZishiName } from './types'
 
 export const ZISHI_TO_BRANCH: Record<ZishiName, EarthlyBranch> = {

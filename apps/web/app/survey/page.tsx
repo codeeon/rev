@@ -4,9 +4,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { QuestionChoice } from '@/components/survey/question-choice'
-import { ENGINE_QUESTIONS } from '@/lib/engine/loader'
-import { inferZishi, toInferredHourPillar } from '@/lib/survey/weight-engine'
-import type { SurveyAnswer } from '@/lib/survey/types'
+import { ENGINE_QUESTIONS, inferZishi, toInferredHourPillar, type SurveyAnswer } from '@workspace/time-inference'
 
 export default function SurveyPage() {
   const router = useRouter()

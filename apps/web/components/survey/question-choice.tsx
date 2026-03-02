@@ -1,6 +1,6 @@
 'use client'
 
-import type { EngineOption } from '@/lib/engine/types'
+import type { EngineOption } from '@workspace/time-inference'
 import { Button } from '@workspace/base-ui'
 
 interface QuestionChoiceProps {
