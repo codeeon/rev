@@ -1,6 +1,6 @@
 # 사주 역추론 엔진 마이그레이션 계획 (v4.1)
 
-본 문서는 `docs/data/engine.json` 및 `docs/engine-data-description.md`의 "Reverse Saju MVP 엔진 데이터 v4.1" 명세에 따라 현재 임시 데이터로 구현된 사주 역추론 로직을 실제 서비스 기준으로 마이그레이션하기 위한 상세 계획 문서입니다.
+본 문서는 `docs/data/engine.json` 및 `docs/archived/prd/engine-data-description.md`의 "Reverse Saju MVP 엔진 데이터 v4.1" 명세에 따라 현재 임시 데이터로 구현된 사주 역추론 로직을 실제 서비스 기준으로 마이그레이션하기 위한 상세 계획 문서입니다.
 
 ## 1. 개요 및 설계 철학
 기존의 단순 합산(Linear Summation) 방식에서 벗어나, 사용자의 현대적 라이프스타일(습관)을 통해 타고난 명리학적 기운을 역추론하는 **확률 기반 엔진**으로 고도화합니다.

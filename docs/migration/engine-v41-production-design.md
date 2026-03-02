@@ -2,7 +2,7 @@
 
 ## 1) Goal
 
-현재 코드의 임시 질문/계산 로직을 폐기하고, `docs/data/engine.json` + `docs/engine-data-description.md`를 단일 기준(Source of Truth)으로 사용하는 실서비스용 추론 설계를 확정한다.
+현재 코드의 임시 질문/계산 로직을 폐기하고, `docs/data/engine.json` + `docs/archived/prd/engine-data-description.md`를 단일 기준(Source of Truth)으로 사용하는 실서비스용 추론 설계를 확정한다.
 
 - 기준 데이터: `docs/data/engine.json` (v4.1)
 - 기준 철학: 가중치 누적 -> Softmax(T=1.2) -> CUSP 판정

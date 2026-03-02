@@ -8,8 +8,8 @@
 
 - `docs/migration/engine-implementation-design.md`
 - `docs/migration/engine-logic-migration-plan.md`
-- `docs/migration/engine-migration-plan.md`
-- `docs/migration/engine-refactor-plan.md`
+- `docs/archived/migration/engine-migration-plan.md`
+- `docs/archived/migration/engine-refactor-plan.md`
 - `docs/migration/engine-v41-production-design.md`
 
 ## 2. Analysis Method (Why this method)
@@ -97,7 +97,7 @@
 보완 소스(병행 참조):
 
 - 구현 체크리스트/테스트 깊이: `docs/migration/engine-implementation-design.md`
-- 파일 단위 변경 경로: `docs/migration/engine-refactor-plan.md`
+- 파일 단위 변경 경로: `docs/archived/migration/engine-refactor-plan.md`
 - PR 단위 진행 플랜: `docs/migration/engine-logic-migration-plan.md`
 
 ## 6. Consolidation strategy

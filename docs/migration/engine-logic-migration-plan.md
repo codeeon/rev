@@ -2,7 +2,7 @@
 
 ## 1. 목적
 
-현재 코드의 임시 질문/가중치 로직을 폐기하고, `docs/data/engine.json` + `docs/engine-data-description.md`를 단일 소스로 사용하는 엔진으로 전환한다.
+현재 코드의 임시 질문/가중치 로직을 폐기하고, `docs/data/engine.json` + `docs/archived/prd/engine-data-description.md`를 단일 소스로 사용하는 엔진으로 전환한다.
 
 ## 2. 범위
 

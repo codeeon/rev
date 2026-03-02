@@ -1,6 +1,6 @@
 # 역추론 엔진 리팩토링 상세 계획 - Claude Opus
 
-> **기준 문서**: [engine.json](file:///Users/sangyeon/Desktop/projects/rev/docs/data/engine.json) (v4.1) + [engine-data-description.md](file:///Users/sangyeon/Desktop/projects/rev/docs/engine-data-description.md)
+> **기준 문서**: `docs/data/engine.json` (v4.1) + `docs/archived/prd/engine-data-description.md`
 
 ---
 

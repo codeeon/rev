@@ -1,6 +1,6 @@
 # 역추론 엔진 구현 설계서 (v4.1 기준)
 
-> **입력 소스**: `docs/data/engine.json` (v4.1) + `docs/engine-data-description.md`
+> **입력 소스**: `docs/data/engine.json` (v4.1) + `docs/archived/prd/engine-data-description.md`
 > **목적**: 임시 12문항 코드를 폐기하고 engine.json 기반의 실제 엔진으로 전환하기 위한 구현 설계
 
 ---

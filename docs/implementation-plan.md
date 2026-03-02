@@ -1,7 +1,7 @@
 # 엔진 v4.1 구현 플랜
 
 > **기준 스펙**: `docs/data/engine.json` (v4.1)
-> **비교 분석**: `docs/migration/document-comparison-analysis.md`
+> **비교 분석(Archive)**: `docs/archived/migration/document-comparison-analysis.md`
 > **작성일**: 2026-03-02
 
 ---
