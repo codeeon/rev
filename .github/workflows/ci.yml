@@ -36,5 +36,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Engine data SoT checksum
+        run: pnpm run check:engine-sot
+
       - name: Monorepo checks
         run: pnpm run ci:monorepo
