@@ -1,5 +1,5 @@
 import { BRANCH_KR } from './constants'
-import { isValidBirthInfo, isValidInferredHour, parseAnalyzeInput } from './validation'
+import { MAX_BIRTH_YEAR, MIN_BIRTH_YEAR, isValidBirthInfo, isValidInferredHour, parseAnalyzeInput } from './validation'
 
 function expect(condition: boolean, message: string): void {
   if (!condition) {
@@ -105,3 +105,33 @@ const parsedInvalid = parseAnalyzeInput({
 })
 
 expect(parsedInvalid === null, 'invalid payload should be rejected')
+
+const minYearBirthInfo = {
+  year: MIN_BIRTH_YEAR,
+  month: 1,
+  day: 1,
+  isLunar: false,
+  gender: 'male' as const,
+}
+
+expect(isValidBirthInfo(minYearBirthInfo), 'minimum birth year should pass')
+
+const outOfRangeYearBirthInfo = {
+  year: MIN_BIRTH_YEAR - 1,
+  month: 1,
+  day: 1,
+  isLunar: false,
+  gender: 'female' as const,
+}
+
+expect(!isValidBirthInfo(outOfRangeYearBirthInfo), 'birth year below minimum should fail')
+
+const maxYearBirthInfo = {
+  year: MAX_BIRTH_YEAR,
+  month: 12,
+  day: 31,
+  isLunar: false,
+  gender: 'male' as const,
+}
+
+expect(isValidBirthInfo(maxYearBirthInfo), 'maximum birth year should pass')

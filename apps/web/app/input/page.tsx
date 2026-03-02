@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { BottomButton } from '@/components/layout/bottom-button'
-import { getMaxBirthDay } from '@workspace/saju-core'
+import { getMaxBirthDay, MAX_BIRTH_YEAR, MIN_BIRTH_YEAR } from '@workspace/saju-core'
 
-const YEARS = Array.from({ length: 90 }, (_, i) => 2010 - i)
+const YEARS = Array.from({ length: MAX_BIRTH_YEAR - MIN_BIRTH_YEAR + 1 }, (_, i) => MAX_BIRTH_YEAR - i)
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
 
 export default function InputPage() {

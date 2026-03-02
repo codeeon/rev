@@ -7,6 +7,9 @@ interface AnalyzeInput {
   inferredHour?: InferredHourPillar
 }
 
+export const MIN_BIRTH_YEAR = 1900
+export const MAX_BIRTH_YEAR = 2100
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
@@ -49,7 +52,7 @@ export function isValidBirthInfo(value: unknown): value is BirthInfo {
   const isLunar = value.isLunar
   const gender = value.gender
 
-  if (typeof year !== 'number' || !Number.isInteger(year) || year < 1900 || year > 2100) return false
+  if (typeof year !== 'number' || !Number.isInteger(year) || year < MIN_BIRTH_YEAR || year > MAX_BIRTH_YEAR) return false
   if (typeof month !== 'number' || !Number.isInteger(month) || month < 1 || month > 12) return false
   if (typeof day !== 'number' || !Number.isInteger(day) || day < 1) return false
   if (typeof isLunar !== 'boolean') return false
