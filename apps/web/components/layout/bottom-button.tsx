@@ -1,7 +1,6 @@
 'use client'
 
-import { cn } from '@workspace/base-ui/lib/utils'
-import { Button } from '@workspace/base-ui/components/button'
+import { cn, Button } from '@workspace/base-ui'
 
 interface BottomButtonProps {
   children: React.ReactNode

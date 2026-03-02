@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@workspace/base-ui/components/button'
+import { Button } from '@workspace/base-ui'
 
 interface QuestionScaleProps {
   labels?: { low: string; high: string }

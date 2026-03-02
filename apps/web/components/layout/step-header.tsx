@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
-import { Button } from '@workspace/base-ui/components/button'
+import { Button } from '@workspace/base-ui'
 
 interface StepHeaderProps {
   title?: string

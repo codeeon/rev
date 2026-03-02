@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@workspace/base-ui/components/button'
+import { Button } from '@workspace/base-ui'
 
 interface QuestionYNProps {
   onAnswer: (value: 'yes' | 'no') => void

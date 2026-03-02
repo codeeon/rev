@@ -1,7 +1,7 @@
 'use client'
 
 import type { EngineOption } from '@/lib/engine/types'
-import { Button } from '@workspace/base-ui/components/button'
+import { Button } from '@workspace/base-ui'
 
 interface QuestionChoiceProps {
   options: EngineOption[]

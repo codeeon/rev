@@ -2,7 +2,7 @@
 
 import type { Pillar, FiveElement } from '@/lib/saju/types'
 import { ELEMENT_KR } from '@/lib/saju/constants'
-import { cn } from '@workspace/base-ui/lib/utils'
+import { cn, Card, CardContent, Badge, Separator } from '@workspace/base-ui'
 
 interface PillarCardProps {
   label: string
@@ -40,51 +40,46 @@ export function PillarCard({ label, pillar, isInferred, confidence }: PillarCard
     <div className="flex flex-col items-center gap-2">
       <span className="text-[12px] font-medium text-muted-foreground">{label}</span>
 
-      <div
-        className={cn(
-          'relative flex flex-col items-center gap-1 rounded-2xl border-2 px-3 py-4',
-          elementBorder[pillar.stemElement]
-        )}
-      >
+      <Card className={cn('relative border-2', elementBorder[pillar.stemElement])}>
         {isInferred && (
-          <span className="absolute -top-2.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
+          <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-semibold">
             추론
-          </span>
+          </Badge>
         )}
 
-        {/* 천간 (Heavenly Stem) */}
-        <div
-          className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-xl',
-            elementBg[pillar.stemElement]
-          )}
-        >
-          <span className={cn('text-[22px] font-bold', elementText[pillar.stemElement])}>
-            {pillar.stem}
-          </span>
-        </div>
-        <span className="text-[11px] text-muted-foreground">
-          {pillar.stemKr} ({ELEMENT_KR[pillar.stemElement].split('(')[0]})
-        </span>
+        <CardContent className="flex flex-col items-center gap-1 px-3 py-4">
 
-        {/* Divider */}
-        <div className="my-1 h-px w-8 bg-border" />
-
-        {/* 지지 (Earthly Branch) */}
-        <div
-          className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-xl',
-            elementBg[pillar.branchElement]
-          )}
-        >
-          <span className={cn('text-[22px] font-bold', elementText[pillar.branchElement])}>
-            {pillar.branch}
+          <div
+            className={cn(
+              'flex h-12 w-12 items-center justify-center rounded-xl',
+              elementBg[pillar.stemElement]
+            )}
+          >
+            <span className={cn('text-[22px] font-bold', elementText[pillar.stemElement])}>
+              {pillar.stem}
+            </span>
+          </div>
+          <span className="text-[11px] text-muted-foreground">
+            {pillar.stemKr} ({ELEMENT_KR[pillar.stemElement].split('(')[0]})
           </span>
-        </div>
-        <span className="text-[11px] text-muted-foreground">
-          {pillar.branchKr} ({ELEMENT_KR[pillar.branchElement].split('(')[0]})
-        </span>
-      </div>
+
+          <Separator className="my-1 h-px w-8" />
+
+          <div
+            className={cn(
+              'flex h-12 w-12 items-center justify-center rounded-xl',
+              elementBg[pillar.branchElement]
+            )}
+          >
+            <span className={cn('text-[22px] font-bold', elementText[pillar.branchElement])}>
+              {pillar.branch}
+            </span>
+          </div>
+          <span className="text-[11px] text-muted-foreground">
+            {pillar.branchKr} ({ELEMENT_KR[pillar.branchElement].split('(')[0]})
+          </span>
+        </CardContent>
+      </Card>
 
       {isInferred && confidence !== undefined && (
         <span className="text-[11px] text-primary">

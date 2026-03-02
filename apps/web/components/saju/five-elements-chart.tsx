@@ -2,6 +2,7 @@
 
 import type { FiveElementDistribution, FiveElement } from '@/lib/saju/types'
 import { ELEMENT_KR } from '@/lib/saju/constants'
+import { Progress, Card, CardContent } from '@workspace/base-ui'
 
 const COLORS: Record<FiveElement, string> = {
   wood: '#22c55e',
@@ -39,9 +40,10 @@ export function FiveElementsChart({
               <span className="font-medium text-foreground">{entry.name}</span>
               <span className="font-semibold text-foreground">{entry.value.toFixed(1)}%</span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="relative">
+              <Progress value={Math.max(0, Math.min(100, entry.value))} className="h-2.5" />
               <div
-                className="h-full rounded-full"
+                className="pointer-events-none absolute inset-y-0 left-0 rounded-full"
                 style={{
                   width: `${Math.max(0, Math.min(100, entry.value))}%`,
                   backgroundColor: COLORS[entry.element],
@@ -71,18 +73,22 @@ export function FiveElementsChart({
 
       {/* Summary */}
       <div className="flex gap-2">
-        <div className="flex-1 rounded-xl bg-accent px-4 py-3 text-center">
-          <p className="text-[11px] text-muted-foreground">가장 강한 오행</p>
-          <p className="text-[15px] font-bold" style={{ color: COLORS[dominantElement] }}>
-            {ELEMENT_KR[dominantElement]}
-          </p>
-        </div>
-        <div className="flex-1 rounded-xl bg-secondary px-4 py-3 text-center">
-          <p className="text-[11px] text-muted-foreground">보완이 필요한 오행</p>
-          <p className="text-[15px] font-bold" style={{ color: COLORS[weakestElement] }}>
-            {ELEMENT_KR[weakestElement]}
-          </p>
-        </div>
+        <Card className="flex-1 bg-accent">
+          <CardContent className="px-4 py-3 text-center">
+            <p className="text-[11px] text-muted-foreground">가장 강한 오행</p>
+            <p className="text-[15px] font-bold" style={{ color: COLORS[dominantElement] }}>
+              {ELEMENT_KR[dominantElement]}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="flex-1 bg-secondary">
+          <CardContent className="px-4 py-3 text-center">
+            <p className="text-[11px] text-muted-foreground">보완이 필요한 오행</p>
+            <p className="text-[15px] font-bold" style={{ color: COLORS[weakestElement] }}>
+              {ELEMENT_KR[weakestElement]}
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
