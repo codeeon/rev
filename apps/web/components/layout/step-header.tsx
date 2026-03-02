@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
+import { Button } from '@workspace/base-ui/components/button'
 
 interface StepHeaderProps {
   title?: string
@@ -24,13 +25,16 @@ export function StepHeader({
     <header className="sticky top-0 z-10 flex flex-col gap-3 bg-background px-5 pb-3 pt-4">
       <div className="flex items-center gap-2">
         {showBack && (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => (backHref ? router.push(backHref) : router.back())}
-            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-secondary"
+            className="h-10 w-10 rounded-full"
             aria-label="뒤로 가기"
           >
             <ChevronLeft className="h-6 w-6 text-foreground" />
-          </button>
+          </Button>
         )}
         {title && (
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>

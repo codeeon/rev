@@ -1,0 +1,8 @@
+@import '@workspace/base-ui/styles/globals.css';
+
+:root {
+  --radius: 0.75rem;
+  --primary: oklch(0.45 0.25 265);
+  --ring: oklch(0.45 0.25 265);
+  --water: oklch(0.45 0.25 265);
+}

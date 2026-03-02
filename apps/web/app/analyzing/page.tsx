@@ -160,7 +160,7 @@ export default function AnalyzingPage() {
         />
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes pulse {
           0%, 100% { transform: translateY(0); opacity: 0.7; }
           50% { transform: translateY(-8px); opacity: 1; }

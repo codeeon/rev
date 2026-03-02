@@ -1,5 +1,7 @@
 'use client'
 
+import { Button } from '@workspace/base-ui/components/button'
+
 interface QuestionYNProps {
   onAnswer: (value: 'yes' | 'no') => void
 }
@@ -11,13 +13,14 @@ export function QuestionYN({ onAnswer }: QuestionYNProps) {
         { label: '네', value: 'yes' as const },
         { label: '아니오', value: 'no' as const },
       ].map((opt) => (
-        <button
+        <Button
           key={opt.value}
           onClick={() => onAnswer(opt.value)}
-          className="flex h-14 items-center justify-center rounded-2xl bg-card text-[16px] font-semibold text-foreground shadow-sm transition-all duration-200 hover:bg-secondary active:scale-[0.98]"
+          variant="secondary"
+          className="h-14 rounded-2xl bg-card text-[16px] font-semibold text-foreground shadow-sm active:scale-[0.98]"
         >
           {opt.label}
-        </button>
+        </Button>
       ))}
     </div>
   )

@@ -1,6 +1,5 @@
 'use client'
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import type { FiveElementDistribution, FiveElement } from '@/lib/saju/types'
 import { ELEMENT_KR } from '@/lib/saju/constants'
 
@@ -33,37 +32,26 @@ export function FiveElementsChart({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-[200px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={3}
-              dataKey="value"
-              strokeWidth={0}
-            >
-              {data.map((entry) => (
-                <Cell key={entry.element} fill={COLORS[entry.element]} />
-              ))}
-            </Pie>
-            <Tooltip
-              formatter={(value: number) => [`${value.toFixed(1)}%`, '']}
-              contentStyle={{
-                borderRadius: '12px',
-                border: 'none',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                fontSize: '13px',
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="flex flex-col gap-2">
+        {data.map((entry) => (
+          <div key={entry.element} className="space-y-1">
+            <div className="flex items-center justify-between text-[12px]">
+              <span className="font-medium text-foreground">{entry.name}</span>
+              <span className="font-semibold text-foreground">{entry.value.toFixed(1)}%</span>
+            </div>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.max(0, Math.min(100, entry.value))}%`,
+                  backgroundColor: COLORS[entry.element],
+                }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Legend */}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
         {data.map((entry) => (
           <div key={entry.element} className="flex items-center gap-1.5">
