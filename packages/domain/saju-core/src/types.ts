@@ -93,4 +93,8 @@ export interface AnalysisResult {
   sections: AnalysisSection[]
   summary: string
   rawText: string
+  parser?: {
+    usedFallback: boolean
+    sectionCount: number
+  }
 }
