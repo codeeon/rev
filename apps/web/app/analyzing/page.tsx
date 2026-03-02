@@ -70,12 +70,20 @@ export default function AnalyzingPage() {
       const birthInfo = birthInfoCandidate
       const inferredHour = inferredHourCandidate
 
-      // Calculate saju locally first
-      const sajuResult = analyzeSaju(birthInfo, inferredHour)
+      let sajuResult
+      try {
+        sajuResult = analyzeSaju(birthInfo, inferredHour)
+      } catch {
+        dispatch({ type: 'SET_ANALYZING', payload: false })
+        router.push('/input')
+        return
+      }
+
       dispatch({ type: 'SET_SAJU_RESULT', payload: sajuResult })
       dispatch({ type: 'SET_ANALYZING', payload: true })
 
       try {
+
         // Call AI API
         const response = await fetch('/api/analyze', {
           method: 'POST',
@@ -121,7 +129,6 @@ export default function AnalyzingPage() {
           router.push('/result')
         }, 500)
       } catch {
-        // On error, still navigate to result with saju data (without AI text)
         dispatch({ type: 'SET_ANALYZING', payload: false })
         setProgress(100)
         setTimeout(() => {

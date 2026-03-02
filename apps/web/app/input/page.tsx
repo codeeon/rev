@@ -5,14 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { BottomButton } from '@/components/layout/bottom-button'
+import { getMaxBirthDay } from '@workspace/saju-core'
 
 const YEARS = Array.from({ length: 90 }, (_, i) => 2010 - i)
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
-
-function getDaysInMonth(year: number, month: number, isLunar: boolean): number {
-  if (isLunar) return 30
-  return new Date(year, month, 0).getDate()
-}
 
 export default function InputPage() {
   const router = useRouter()
@@ -27,7 +23,7 @@ export default function InputPage() {
 
   const days = useMemo(() => {
     if (!year || !month) return Array.from({ length: 31 }, (_, i) => i + 1)
-    return Array.from({ length: getDaysInMonth(year, month, isLunar) }, (_, i) => i + 1)
+    return Array.from({ length: getMaxBirthDay(year, month, isLunar) }, (_, i) => i + 1)
   }, [year, month, isLunar])
 
   const isValidDay = typeof day === 'number' && day >= 1 && day <= days.length
