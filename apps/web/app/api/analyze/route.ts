@@ -3,7 +3,66 @@ import { NextResponse } from 'next/server'
 import { buildAnalysisPrompt } from '@/lib/ai/prompts'
 import { analyzeSaju, parseAnalyzeInput } from '@workspace/saju-core'
 
+declare global {
+  var __analyzeRateLimitStore: Map<string, RateLimitEntry> | undefined
+}
+
+const RATE_LIMIT_WINDOW_MS = 60_000
+const RATE_LIMIT_MAX_REQUESTS = 20
+
+interface RateLimitEntry {
+  count: number
+  resetAt: number
+}
+
+const rateLimitStore = globalThis.__analyzeRateLimitStore ?? new Map<string, RateLimitEntry>()
+globalThis.__analyzeRateLimitStore = rateLimitStore
+
+function getClientKey(req: Request): string {
+  const forwardedFor = req.headers.get('x-forwarded-for')
+  const ip = forwardedFor?.split(',')[0]?.trim() || 'unknown-ip'
+  const userAgent = req.headers.get('user-agent') || 'unknown-agent'
+  return `${ip}:${userAgent}`
+}
+
+function isRateLimited(clientKey: string, now = Date.now()): boolean {
+  const entry = rateLimitStore.get(clientKey)
+
+  if (!entry || entry.resetAt <= now) {
+    rateLimitStore.set(clientKey, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
+    return false
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return true
+  }
+
+  entry.count += 1
+  return false
+}
+
+function getRetryAfterSeconds(clientKey: string, now = Date.now()): string {
+  const entry = rateLimitStore.get(clientKey)
+  if (!entry) return '60'
+
+  const remainingMs = Math.max(1_000, entry.resetAt - now)
+  return String(Math.ceil(remainingMs / 1_000))
+}
+
 export async function POST(req: Request) {
+  const clientKey = getClientKey(req)
+  if (isRateLimited(clientKey)) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: { 'Retry-After': getRetryAfterSeconds(clientKey) } },
+    )
+  }
+
+  const contentType = req.headers.get('content-type') || ''
+  if (!contentType.toLowerCase().includes('application/json')) {
+    return NextResponse.json({ error: 'Unsupported content type' }, { status: 415 })
+  }
+
   let body: unknown
 
   try {
