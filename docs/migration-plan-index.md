@@ -29,6 +29,7 @@
 | P0 | Critical | Done | `docs/migration/engine-v41-production-design.md` | **기준 설계(Canonical)**: 데이터/수식/계약/DoD 기준 | 모든 구현/리뷰 시작 전 |
 | P1 | High | In Progress | `docs/implementation-plan.md` | 현재 코드 기준 실행 플랜(Phase 단위) | 실제 작업 착수 시 즉시 |
 | P1 | High | In Progress | `docs/migration/engine-implementation-design.md` | 상세 구현 사양(타입, 함수, 검증 체크) | 구현 중 세부 의사결정 시 |
+| P2 | High | Done | `docs/migration/domain-boundary-notes.md` | 도메인 경계 결정 기록(`lunar-javascript` 타입 단일화, `engine-data` 분리 유지) | 패키지 구조 변경/정리 작업 전 |
 | P3 | Medium | Reference | `docs/migration/engine-logic-migration-plan.md` | PR 단위 전환 계획/테스트 관점 보강 | 병렬 리뷰/리스크 점검 시 |
 
 ## 권장 읽기 순서
@@ -36,7 +37,8 @@
 1. `docs/migration/engine-v41-production-design.md`
 2. `docs/implementation-plan.md`
 3. `docs/migration/engine-implementation-design.md`
-4. `docs/migration/engine-logic-migration-plan.md`
+4. `docs/migration/domain-boundary-notes.md`
+5. `docs/migration/engine-logic-migration-plan.md`
 
 운영/연동 문서(마이그레이션 직접 범위 외):
 

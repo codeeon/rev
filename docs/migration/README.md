@@ -7,6 +7,7 @@
 - `engine-v41-production-design.md`
 - `engine-implementation-design.md`
 - `engine-logic-migration-plan.md`
+- `domain-boundary-notes.md`
 - `design-system-monorepo-migration-checklist.md`
 - `design-system-style-layering-guide.md`
 - `design-system-governance-adr.md`
