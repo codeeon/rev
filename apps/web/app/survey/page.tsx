@@ -41,7 +41,8 @@ export default function SurveyPage() {
         const surveyResult = inferZishi(updatedAnswers, {
           approximateRange: state.birthTimeKnowledge === 'approximate' ? state.approximateRange : null,
         })
-        const inferredHour = toInferredHourPillar(surveyResult)
+        const inferredMethod = state.birthTimeKnowledge === 'approximate' ? 'approximate' : 'survey'
+        const inferredHour = toInferredHourPillar(surveyResult, inferredMethod)
 
         dispatch({ type: 'SET_SURVEY_ANSWERS', payload: updatedAnswers })
         dispatch({ type: 'SET_INFERRED_HOUR', payload: inferredHour })

@@ -5,7 +5,10 @@ import type { SurveyResult } from './types'
 
 export { inferZishi }
 
-export function toInferredHourPillar(result: SurveyResult): InferredHourPillar {
+export function toInferredHourPillar(
+  result: SurveyResult,
+  method: InferredHourPillar['method'] = 'survey',
+): InferredHourPillar {
   const branch = ZISHI_TO_BRANCH[result.inferredZishi]
   return {
     branch,
@@ -17,7 +20,7 @@ export function toInferredHourPillar(result: SurveyResult): InferredHourPillar {
       score: c.rawScore,
       percentage: c.percentage,
     })),
-    method: 'survey',
+    method,
     isCusp: result.cusp.isCusp,
     cuspCandidates: result.cusp.isCusp
       ? [result.topCandidates[0].branch, result.topCandidates[1].branch]

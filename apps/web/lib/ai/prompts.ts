@@ -27,7 +27,12 @@ export function buildAnalysisPrompt({ sajuResult, inferredHour }: PromptOptions)
   // 추론 메타 정보
   let inferenceMeta = ''
   if (inferredHour) {
-    const methodKr = inferredHour.method === 'survey' ? '설문 역추론' : '범위 추론'
+    const methodKr =
+      inferredHour.method === 'survey'
+        ? '설문 역추론'
+        : inferredHour.method === 'approximate'
+          ? '범위 추론'
+          : '기록 기반 입력'
     inferenceMeta = `\n## 시주 추론 정보\n- 추론 방법: ${methodKr}\n- 신뢰도: ${inferredHour.confidence}%`
 
     if (inferredHour.isCusp && inferredHour.cuspCandidates) {

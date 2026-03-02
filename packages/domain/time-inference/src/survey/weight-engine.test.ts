@@ -47,3 +47,13 @@ test('toInferredHourPillar maps SurveyResult fields to current InferredHourPilla
     )
   }
 })
+
+test('toInferredHourPillar keeps explicit inference method metadata', () => {
+  const surveyResult = inferZishi([])
+
+  const approximate = toInferredHourPillar(surveyResult, 'approximate')
+  assert.equal(approximate.method, 'approximate')
+
+  const survey = toInferredHourPillar(surveyResult)
+  assert.equal(survey.method, 'survey')
+})
