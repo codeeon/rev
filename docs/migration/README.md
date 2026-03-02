@@ -1,8 +1,8 @@
-# Migration Docs
+# 마이그레이션 문서
 
 `docs/migration`에는 현재 기준으로 유지 중인 마이그레이션 핵심 문서만 둔다.
 
-## Active
+## 현재 문서
 
 - `engine-v41-production-design.md`
 - `engine-implementation-design.md`
@@ -12,7 +12,7 @@
 - `design-system-style-layering-guide.md`
 - `design-system-governance-adr.md`
 
-## Related
+## 연관 문서
 
 - 상위 실행 인덱스: `docs/migration-plan-index.md`
 - 구현 실행 플랜: `docs/implementation-plan.md`

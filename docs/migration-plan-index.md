@@ -1,4 +1,4 @@
-# Docs Plan Index
+# 문서 실행 인덱스
 
 ## 목적
 
@@ -6,31 +6,31 @@
 
 평가 기준:
 
-- **우선순위(Priority)**: 지금 당장 실행에 필요한 순서
-- **중요도(Importance)**: 잘못 해석되면 제품/운영 리스크가 큰 정도
+- **우선순위**: 지금 당장 실행에 필요한 순서
+- **중요도**: 잘못 해석되면 제품/운영 리스크가 큰 정도
 
 ## 실행 우선순위 요약
 
-1. 기준 설계 확정 (Canonical)
+1. 기준 설계 확정(정본)
 2. 구현 실행 계획
 3. 보조 참고 문서로 리스크 점검
 
-## Status Legend
+## 상태 범례
 
-- `Done`: 반영 완료(또는 목적 달성)
-- `In Progress`: 일부 반영, 후속 작업 필요
-- `Planned`: 아직 구현 전, 계획 단계
-- `Reference`: 참고용(보조 문서)
+- `완료`: 반영 완료(또는 목적 달성)
+- `진행 중`: 일부 반영, 후속 작업 필요
+- `계획`: 아직 구현 전, 계획 단계
+- `참고`: 참고용(보조 문서)
 
-## Plan Table
+## 실행 표
 
-| Priority | Importance | Status | 문서 | 역할 | 사용 시점 |
+| 우선순위 | 중요도 | 상태 | 문서 | 역할 | 사용 시점 |
 | --- | --- | --- | --- | --- | --- |
-| P0 | Critical | Done | `docs/migration/engine-v41-production-design.md` | **기준 설계(Canonical)**: 데이터/수식/계약/DoD 기준 | 모든 구현/리뷰 시작 전 |
-| P1 | High | In Progress | `docs/implementation-plan.md` | 현재 코드 기준 실행 플랜(Phase 단위) | 실제 작업 착수 시 즉시 |
-| P1 | High | In Progress | `docs/migration/engine-implementation-design.md` | 상세 구현 사양(타입, 함수, 검증 체크) | 구현 중 세부 의사결정 시 |
-| P2 | High | Done | `docs/migration/domain-boundary-notes.md` | 도메인 경계 결정 기록(`lunar-javascript` 타입 단일화, `engine-data` 분리 유지) | 패키지 구조 변경/정리 작업 전 |
-| P3 | Medium | Reference | `docs/migration/engine-logic-migration-plan.md` | PR 단위 전환 계획/테스트 관점 보강 | 병렬 리뷰/리스크 점검 시 |
+| P0 | 매우 높음 | 완료 | `docs/migration/engine-v41-production-design.md` | **기준 설계(정본)**: 데이터/수식/계약/DoD 기준 | 모든 구현/리뷰 시작 전 |
+| P1 | 높음 | 진행 중 | `docs/implementation-plan.md` | 현재 코드 기준 실행 플랜(Phase 단위) | 실제 작업 착수 시 즉시 |
+| P1 | 높음 | 진행 중 | `docs/migration/engine-implementation-design.md` | 상세 구현 사양(타입, 함수, 검증 체크) | 구현 중 세부 의사결정 시 |
+| P2 | 높음 | 완료 | `docs/migration/domain-boundary-notes.md` | 도메인 경계 결정 기록(`lunar-javascript` 타입 단일화, `engine-data` 분리 유지, analyze input validator 도메인 이관, typecheck 안정성 메모) | 패키지 구조 변경/정리 작업 전 |
+| P3 | 보통 | 참고 | `docs/migration/engine-logic-migration-plan.md` | PR 단위 전환 계획/테스트 관점 보강 | 병렬 리뷰/리스크 점검 시 |
 
 ## 권장 읽기 순서
 

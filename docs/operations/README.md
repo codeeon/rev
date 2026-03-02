@@ -1,4 +1,4 @@
-# Operations Docs Index
+# 운영 문서 인덱스
 
 `docs/operations`는 마이그레이션 완료 이후의 운영/연동 단계 문서를 모아둔 경로다.
 

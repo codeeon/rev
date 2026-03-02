@@ -23,5 +23,30 @@
 
 ## 3) 후속 정리 후보
 
-- 변경 커밋 시, 이번 문서와 `apps/web/types/lunar-javascript.d.ts` 삭제를 함께 기록한다.
 - 필요 시 `packages/domain/engine-data/src/index.ts`의 미사용 export 정리를 별도 커밋으로 분리한다.
+
+## 4) 분석 입력 검증(Analyze Input) 경계 정리
+
+- 결정: `BirthInfo`/`InferredHourPillar` 런타임 검증은 `@workspace/saju-core`가 소유한다.
+- 반영:
+  - `packages/domain/saju-core/src/validation.ts` 신설
+  - `packages/domain/saju-core/src/index.ts`에서 validator export
+  - `apps/web/app/api/analyze/route.ts`는 `parseAnalyzeInput` 호출 + HTTP status 매핑만 담당
+  - `apps/web/app/analyzing/page.tsx`도 동일 validator 재사용
+- 배경:
+  - 동일 입력 계약을 API/클라이언트가 중복 구현하면 drift 위험이 커진다.
+  - 도메인 함수(`analyzeSaju`) 소비 경로가 여러 곳이므로, 검증 규칙도 도메인 단일 소스로 유지하는 편이 안전하다.
+
+검증:
+
+- `pnpm --filter @workspace/saju-core test` 통과 (`src/validation.spec.ts`)
+- `pnpm run ci:monorepo` 통과
+
+## 5) typecheck 실행 안정성 메모
+
+- 결정: `web:typecheck`는 `next typegen`을 선행하고, Turbo에서 `typecheck`가 `build`를 선행하도록 유지한다.
+- 배경: `.next/types` 생성 타이밍 레이스로 인한 간헐 실패를 제거하기 위함.
+
+검증:
+
+- `pnpm run ci:monorepo` 반복 실행 시 lint/typecheck/test:engine/build 통과
