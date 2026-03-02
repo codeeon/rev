@@ -8,11 +8,12 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:engine": "rm -rf .tmp-test && tsc --outDir .tmp-test --module node16 --moduleResolution node16 --target es2020 --resolveJsonModule --esModuleInterop --skipLibCheck --types node lib/engine/scoring.test.ts lib/survey/weight-engine.test.ts && node --test .tmp-test/engine/scoring.test.js .tmp-test/survey/weight-engine.test.js && rm -rf .tmp-test"
+    "test:engine": "pnpm --filter @workspace/time-inference test"
   },
   "dependencies": {
     "@workspace/base-ui": "workspace:*",
-    "@workspace/engine-data": "workspace:*",
+    "@workspace/saju-core": "workspace:*",
+    "@workspace/time-inference": "workspace:*",
     "@vercel/analytics": "catalog:",
     "ai": "catalog:",
     "clsx": "catalog:",

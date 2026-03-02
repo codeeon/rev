@@ -4,14 +4,16 @@
   "version": "0.1.0",
   "packageManager": "pnpm@10.28.0",
   "scripts": {
-    "dev": "pnpm build:data && pnpm build:ui && pnpm --filter web dev",
+    "dev": "pnpm build:data && pnpm build:saju-core && pnpm build:time-inference && pnpm build:ui && pnpm --filter web dev",
     "build:data": "pnpm --filter @workspace/engine-data build",
+    "build:saju-core": "pnpm --filter @workspace/saju-core build",
+    "build:time-inference": "pnpm --filter @workspace/time-inference build",
     "build:ui": "pnpm --filter @workspace/base-ui build",
-    "build": "pnpm build:data && pnpm build:ui && pnpm --filter web build",
+    "build": "pnpm build:data && pnpm build:saju-core && pnpm build:time-inference && pnpm build:ui && pnpm --filter web build",
     "lint": "pnpm --filter web lint",
-    "typecheck": "pnpm build:data && pnpm build:ui && pnpm --filter web exec tsc --noEmit",
+    "typecheck": "pnpm build:data && pnpm build:saju-core && pnpm build:time-inference && pnpm build:ui && pnpm --filter web exec tsc --noEmit",
     "test:engine": "pnpm --filter web test:engine",
-    "ci:monorepo": "pnpm turbo run build --filter=@workspace/engine-data && pnpm turbo run build --filter=@workspace/base-ui && pnpm turbo run lint --filter=web && pnpm turbo run typecheck --filter=web && pnpm turbo run test:engine --filter=web && pnpm turbo run build --filter=web"
+    "ci:monorepo": "pnpm turbo run build --filter=@workspace/engine-data && pnpm turbo run build --filter=@workspace/saju-core && pnpm turbo run build --filter=@workspace/time-inference && pnpm turbo run build --filter=@workspace/base-ui && pnpm turbo run lint --filter=web && pnpm turbo run typecheck --filter=web && pnpm turbo run test:engine --filter=web && pnpm turbo run build --filter=web"
   },
   "devDependencies": {
     "turbo": "catalog:tooling"
