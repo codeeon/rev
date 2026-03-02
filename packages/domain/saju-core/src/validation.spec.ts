@@ -37,6 +37,16 @@ const lunarBirthInfo = {
 
 expect(isValidBirthInfo(lunarBirthInfo), 'lunar day 30 should pass')
 
+const invalidLunarBirthInfo = {
+  year: 2024,
+  month: 1,
+  day: 30,
+  isLunar: true,
+  gender: 'male' as const,
+}
+
+expect(!isValidBirthInfo(invalidLunarBirthInfo), 'invalid lunar date should fail')
+
 const validInferredHour = {
   branch: '子',
   branchKr: BRANCH_KR['子'],

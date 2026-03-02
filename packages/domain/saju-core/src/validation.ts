@@ -1,3 +1,4 @@
+import { Lunar } from 'lunar-javascript'
 import { BRANCH_KR, EARTHLY_BRANCHES } from './constants'
 import type { BirthInfo, EarthlyBranch, InferredHourPillar } from './types'
 
@@ -22,6 +23,23 @@ function getDaysInGregorianMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate()
 }
 
+function isValidLunarDate(year: number, month: number, day: number): boolean {
+  try {
+    Lunar.fromYmd(year, month, day)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function getMaxBirthDay(year: number, month: number, isLunar: boolean): number {
+  if (!isLunar) {
+    return getDaysInGregorianMonth(year, month)
+  }
+
+  return isValidLunarDate(year, month, 30) ? 30 : 29
+}
+
 export function isValidBirthInfo(value: unknown): value is BirthInfo {
   if (!isRecord(value)) return false
 
@@ -37,8 +55,9 @@ export function isValidBirthInfo(value: unknown): value is BirthInfo {
   if (typeof isLunar !== 'boolean') return false
   if (gender !== 'male' && gender !== 'female') return false
 
-  const maxDay = isLunar ? 30 : getDaysInGregorianMonth(year, month)
+  const maxDay = getMaxBirthDay(year, month, isLunar)
   if (day > maxDay) return false
+  if (isLunar && !isValidLunarDate(year, month, day)) return false
 
   const hour = value.hour
   const minute = value.minute
