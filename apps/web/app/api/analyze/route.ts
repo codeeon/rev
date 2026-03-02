@@ -1,7 +1,6 @@
 import { streamText } from 'ai'
 import { buildAnalysisPrompt } from '@/lib/ai/prompts'
-import { analyzeSaju } from '@/lib/saju/calculator'
-import type { BirthInfo, InferredHourPillar } from '@/lib/saju/types'
+import { analyzeSaju, type BirthInfo, type InferredHourPillar } from '@workspace/saju-core'
 
 export async function POST(req: Request) {
   const body = await req.json()

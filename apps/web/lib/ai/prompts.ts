@@ -1,5 +1,4 @@
-import type { SajuResult, FiveElement, InferredHourPillar } from '../saju/types'
-import { ELEMENT_KR } from '../saju/constants'
+import { ELEMENT_KR, type SajuResult, type FiveElement, type InferredHourPillar } from '@workspace/saju-core'
 
 interface PromptOptions {
   sajuResult: SajuResult

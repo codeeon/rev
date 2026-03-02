@@ -6,7 +6,7 @@ import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { PillarCard } from '@/components/saju/pillar-card'
 import { FiveElementsChart } from '@/components/saju/five-elements-chart'
-import { ELEMENT_KR, STEM_KR } from '@/lib/saju/constants'
+import { ELEMENT_KR, STEM_KR } from '@workspace/saju-core'
 import { ChevronDown, ChevronUp, RotateCcw, MessageSquare } from 'lucide-react'
 
 export default function ResultPage() {

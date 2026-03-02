@@ -3,8 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
-import { analyzeSaju } from '@/lib/saju/calculator'
-import type { BirthInfo } from '@/lib/saju/types'
+import { analyzeSaju, type BirthInfo } from '@workspace/saju-core'
 
 const LOADING_MESSAGES = [
   '사주 원국을 세우고 있어요...',

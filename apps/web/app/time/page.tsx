@@ -5,8 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { BottomButton } from '@/components/layout/bottom-button'
-import { BRANCH_HOURS, BRANCH_KR, hourToBranch } from '@/lib/saju/constants'
-import type { EarthlyBranch } from '@/lib/saju/types'
+import { BRANCH_HOURS, BRANCH_KR, hourToBranch, type EarthlyBranch } from '@workspace/saju-core'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 

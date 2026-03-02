@@ -1,7 +1,6 @@
 'use client'
 
-import type { FiveElementDistribution, FiveElement } from '@/lib/saju/types'
-import { ELEMENT_KR } from '@/lib/saju/constants'
+import { ELEMENT_KR, type FiveElementDistribution, type FiveElement } from '@workspace/saju-core'
 import { Card, CardContent } from '@workspace/base-ui'
 
 const COLORS: Record<FiveElement, string> = {

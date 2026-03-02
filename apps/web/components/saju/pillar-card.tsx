@@ -1,7 +1,6 @@
 'use client'
 
-import type { Pillar, FiveElement } from '@/lib/saju/types'
-import { ELEMENT_KR } from '@/lib/saju/constants'
+import { ELEMENT_KR, type Pillar, type FiveElement } from '@workspace/saju-core'
 import { cn, Card, CardContent, Badge, Separator } from '@workspace/base-ui'
 
 interface PillarCardProps {
