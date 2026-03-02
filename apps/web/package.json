@@ -25,6 +25,7 @@
     "tailwind-merge": "catalog:"
   },
   "devDependencies": {
+    "eslint": "catalog:tooling",
     "@eslint/js": "catalog:tooling",
     "@tailwindcss/postcss": "catalog:tooling",
     "@types/node": "catalog:tooling",
