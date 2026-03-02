@@ -2,7 +2,7 @@
 
 import type { FiveElementDistribution, FiveElement } from '@/lib/saju/types'
 import { ELEMENT_KR } from '@/lib/saju/constants'
-import { Progress, Card, CardContent } from '@workspace/base-ui'
+import { Card, CardContent } from '@workspace/base-ui'
 
 const COLORS: Record<FiveElement, string> = {
   wood: '#22c55e',
@@ -40,10 +40,9 @@ export function FiveElementsChart({
               <span className="font-medium text-foreground">{entry.name}</span>
               <span className="font-semibold text-foreground">{entry.value.toFixed(1)}%</span>
             </div>
-            <div className="relative">
-              <Progress value={Math.max(0, Math.min(100, entry.value))} className="h-2.5" />
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
               <div
-                className="pointer-events-none absolute inset-y-0 left-0 rounded-full"
+                className="h-full rounded-full"
                 style={{
                   width: `${Math.max(0, Math.min(100, entry.value))}%`,
                   backgroundColor: COLORS[entry.element],
