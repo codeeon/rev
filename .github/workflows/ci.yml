@@ -36,20 +36,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Build engine-data package
-        run: pnpm turbo run build --filter=@workspace/engine-data
-
-      - name: Build base-ui package
-        run: pnpm turbo run build --filter=@workspace/base-ui
-
-      - name: Lint web
-        run: pnpm turbo run lint --filter=web
-
-      - name: Typecheck web
-        run: pnpm turbo run typecheck --filter=web
-
-      - name: Test web engine
-        run: pnpm turbo run test:engine --filter=web
-
-      - name: Build web
-        run: pnpm turbo run build --filter=web
+      - name: Monorepo checks
+        run: pnpm run ci:monorepo
