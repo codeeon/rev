@@ -1,6 +1,6 @@
 'use client'
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import type { FiveElementDistribution, FiveElement } from '@/lib/saju/types'
 import { ELEMENT_KR } from '@/lib/saju/constants'
 

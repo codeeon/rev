@@ -111,7 +111,7 @@ export default function AnalyzingPage() {
         setTimeout(() => {
           router.push('/result')
         }, 500)
-      } catch (error) {
+      } catch {
         // On error, still navigate to result with saju data (without AI text)
         dispatch({ type: 'SET_ANALYZING', payload: false })
         setProgress(100)
@@ -122,7 +122,7 @@ export default function AnalyzingPage() {
     }
 
     runAnalysis()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-8">

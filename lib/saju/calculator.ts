@@ -5,7 +5,6 @@ import {
   STEM_KR, STEM_ELEMENT, STEM_YINYANG,
   BRANCH_KR, BRANCH_ELEMENT,
   hourToBranch, getHourStem,
-  HEAVENLY_STEMS, EARTHLY_BRANCHES,
 } from './constants'
 
 function makePillar(stem: HeavenlyStem, branch: EarthlyBranch): Pillar {
