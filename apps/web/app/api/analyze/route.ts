@@ -1,6 +1,7 @@
 import { streamText } from 'ai'
 import { NextResponse } from 'next/server'
 import { buildAnalysisPrompt } from '@/lib/ai/prompts'
+import { encodeAnalyzeMetaLine } from '@/lib/ai/stream-protocol'
 import { analyzeSaju, parseAnalyzeInput } from '@workspace/saju-core'
 
 declare global {
@@ -15,6 +16,22 @@ const RATE_LIMIT_IP_HEADER_MAX_LENGTH = 256
 interface RateLimitEntry {
   count: number
   resetAt: number
+}
+
+type AnalyzeTextStreamer = (prompt: string) => AsyncIterable<string>
+
+const defaultAnalyzeTextStreamer: AnalyzeTextStreamer = (prompt: string) =>
+  streamText({
+    model: 'google/gemini-2.0-flash',
+    prompt,
+    maxOutputTokens: 2000,
+    temperature: 0.7,
+  }).textStream
+
+let analyzeTextStreamer: AnalyzeTextStreamer = defaultAnalyzeTextStreamer
+
+export function __setAnalyzeTextStreamerForTest(streamer: AnalyzeTextStreamer | null): void {
+  analyzeTextStreamer = streamer ?? defaultAnalyzeTextStreamer
 }
 
 const rateLimitStore = globalThis.__analyzeRateLimitStore ?? new Map<string, RateLimitEntry>()
@@ -141,15 +158,37 @@ export async function POST(req: Request) {
   try {
     const sajuResult = analyzeSaju(birthInfo, inferredHour)
     const prompt = buildAnalysisPrompt({ sajuResult, inferredHour })
+    const encoder = new TextEncoder()
+    const responseStream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        controller.enqueue(encoder.encode(encodeAnalyzeMetaLine({ sajuResult })))
 
-    const result = streamText({
-      model: 'google/gemini-2.0-flash',
-      prompt,
-      maxOutputTokens: 2000,
-      temperature: 0.7,
+        let textStream: AsyncIterable<string>
+        try {
+          textStream = analyzeTextStreamer(prompt)
+        } catch {
+          controller.close()
+          return
+        }
+
+        try {
+          for await (const chunk of textStream) {
+            if (!chunk) continue
+            controller.enqueue(encoder.encode(chunk))
+          }
+          controller.close()
+        } catch {
+          controller.close()
+        }
+      },
     })
 
-    return result.toTextStreamResponse()
+    return new Response(responseStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+      },
+    })
   } catch {
     return NextResponse.json({ error: 'Failed to generate analysis' }, { status: 500 })
   }

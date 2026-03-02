@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { POST } from './route'
+import { parseAnalyzeMetaLine } from '@/lib/ai/stream-protocol'
+import { POST, __setAnalyzeTextStreamerForTest } from './route'
 
 declare global {
   var __analyzeRateLimitStore: Map<string, { count: number; resetAt: number }> | undefined
@@ -10,6 +11,22 @@ declare global {
 function clearRateLimitStore(): void {
   globalThis.__analyzeRateLimitStore?.clear()
 }
+
+function createValidRequestBody() {
+  return JSON.stringify({
+    birthInfo: {
+      year: 1995,
+      month: 8,
+      day: 13,
+      isLunar: false,
+      gender: 'male',
+    },
+  })
+}
+
+test.afterEach(() => {
+  __setAnalyzeTextStreamerForTest(null)
+})
 
 function requestWithBody(
   body: string,
@@ -85,4 +102,52 @@ test('POST normalizes invalid client IP headers into unknown bucket', async () =
 
   const limited = await POST(requestWithBody('{', 'application/json', invalidHeaderA))
   assert.equal(limited.status, 429)
+})
+
+test('POST returns success stream with metadata header and text body contract', async () => {
+  clearRateLimitStore()
+
+  __setAnalyzeTextStreamerForTest(async function* () {
+    yield '### 기본 성격 및 성향\n테스트 본문입니다.\n'
+    yield '### 재물운 및 직업운\n테스트 본문입니다.\n'
+  })
+
+  const response = await POST(requestWithBody(createValidRequestBody()))
+
+  assert.equal(response.status, 200)
+  assert.match(response.headers.get('content-type') ?? '', /^text\/plain/i)
+
+  const bodyText = await response.text()
+  const firstLineEnd = bodyText.indexOf('\n')
+  assert.ok(firstLineEnd >= 0)
+
+  const metaLine = bodyText.slice(0, firstLineEnd + 1)
+  const meta = parseAnalyzeMetaLine(metaLine)
+
+  assert.ok(meta)
+  assert.equal(typeof meta.sajuResult.dayMaster, 'string')
+  assert.match(bodyText, /### 기본 성격 및 성향/)
+})
+
+test('POST still returns authoritative metadata when streamer throws synchronously', async () => {
+  clearRateLimitStore()
+
+  __setAnalyzeTextStreamerForTest(() => {
+    throw new Error('stream bootstrap failed')
+  })
+
+  const response = await POST(requestWithBody(createValidRequestBody()))
+
+  assert.equal(response.status, 200)
+  assert.match(response.headers.get('content-type') ?? '', /^text\/plain/i)
+
+  const bodyText = await response.text()
+  const firstLineEnd = bodyText.indexOf('\n')
+  assert.ok(firstLineEnd >= 0)
+
+  const metaLine = bodyText.slice(0, firstLineEnd + 1)
+  const meta = parseAnalyzeMetaLine(metaLine)
+
+  assert.ok(meta)
+  assert.equal(typeof meta.sajuResult.dayMaster, 'string')
 })
