@@ -20,7 +20,7 @@ export function BottomButton({
   className,
 }: BottomButtonProps) {
   return (
-    <div className="sticky bottom-0 bg-gradient-to-t from-background via-background to-background/0 px-5 pb-8 pt-4">
+      <div className="sticky bottom-0 bg-linear-to-t from-background via-background to-background/0 px-5 pb-8 pt-4">
       <Button
         type={type}
         onClick={onClick}

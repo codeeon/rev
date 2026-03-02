@@ -67,7 +67,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <div className="sticky bottom-0 bg-gradient-to-t from-background via-background to-background/0 px-5 pb-8 pt-4">
+      <div className="sticky bottom-0 bg-linear-to-t from-background via-background to-background/0 px-5 pb-8 pt-4">
         <button
           onClick={() => router.push('/input')}
           className="flex h-14 w-full items-center justify-center rounded-2xl bg-primary text-[17px] font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
