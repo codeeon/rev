@@ -9,6 +9,7 @@
 - `engine-logic-migration-plan.md`
 - `design-system-monorepo-migration-checklist.md`
 - `design-system-style-layering-guide.md`
+- `design-system-governance-adr.md`
 
 ## Related
 

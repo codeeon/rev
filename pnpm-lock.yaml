@@ -176,6 +176,9 @@ catalogs:
     tsup:
       specifier: ^8.3.6
       version: 8.5.1
+    turbo:
+      specifier: ^2.5.8
+      version: 2.8.12
     tw-animate-css:
       specifier: 1.3.3
       version: 1.3.3
@@ -188,7 +191,11 @@ catalogs:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      turbo:
+        specifier: catalog:tooling
+        version: 2.8.12
 
   apps/web:
     dependencies:
@@ -198,6 +205,9 @@ importers:
       '@workspace/base-ui':
         specifier: workspace:*
         version: link:../../packages/design-systems/base-ui
+      '@workspace/engine-data':
+        specifier: workspace:*
+        version: link:../../packages/domain/engine-data
       ai:
         specifier: 'catalog:'
         version: 6.0.97(zod@3.25.76)
@@ -404,6 +414,15 @@ importers:
       '@types/react-dom':
         specifier: catalog:react19
         version: 19.2.3(@types/react@19.2.14)
+      tsup:
+        specifier: catalog:tooling
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(typescript@5.7.3)
+      typescript:
+        specifier: catalog:tooling
+        version: 5.7.3
+
+  packages/domain/engine-data:
+    devDependencies:
       tsup:
         specifier: catalog:tooling
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(typescript@5.7.3)
@@ -2688,6 +2707,40 @@ packages:
       typescript:
         optional: true
 
+  turbo-darwin-64@2.8.12:
+    resolution: {integrity: sha512-EiHJmW2MeQQx+21x8hjMHw/uPhXt9PIxvDrxzOtyVwrXzL0tQmsxtO4qHf2l7uA+K6PUJ4+TjY1MHZDuCvWXrw==}
+    cpu: [x64]
+    os: [darwin]
+
+  turbo-darwin-arm64@2.8.12:
+    resolution: {integrity: sha512-cbqqGN0vd7ly2TeuaM8k9AK9u1CABO4kBA5KPSqovTiLL3sORccn/mZzJSbvQf0EsYRfU34MgW5FotfwW3kx8Q==}
+    cpu: [arm64]
+    os: [darwin]
+
+  turbo-linux-64@2.8.12:
+    resolution: {integrity: sha512-jXKw9j4r4q6s0goSXuKI3aKbQK2qiNeP25lGGEnq018TM6SWRW1CCpPMxyG91aCKrub7wDm/K45sGNT4ZFBcFQ==}
+    cpu: [x64]
+    os: [linux]
+
+  turbo-linux-arm64@2.8.12:
+    resolution: {integrity: sha512-BRJCMdyXjyBoL0GYpvj9d2WNfMHwc3tKmJG5ATn2Efvil9LsiOsd/93/NxDqW0jACtHFNVOPnd/CBwXRPiRbwA==}
+    cpu: [arm64]
+    os: [linux]
+
+  turbo-windows-64@2.8.12:
+    resolution: {integrity: sha512-vyFOlpFFzQFkikvSVhVkESEfzIopgs2J7J1rYvtSwSHQ4zmHxkC95Q8Kjkus8gg+8X2mZyP1GS5jirmaypGiPw==}
+    cpu: [x64]
+    os: [win32]
+
+  turbo-windows-arm64@2.8.12:
+    resolution: {integrity: sha512-9nRnlw5DF0LkJClkIws1evaIF36dmmMEO84J5Uj4oQ8C0QTHwlH7DNe5Kq2Jdmu8GXESCNDNuUYG8Cx6W/vm3g==}
+    cpu: [arm64]
+    os: [win32]
+
+  turbo@2.8.12:
+    resolution: {integrity: sha512-auUAMLmi0eJhxDhQrxzvuhfEbICnVt0CTiYQYY8WyRJ5nwCDZxD0JG8bCSxT4nusI2CwJzmZAay5BfF6LmK7Hw==}
+    hasBin: true
+
   tw-animate-css@1.3.3:
     resolution: {integrity: sha512-tXE2TRWrskc4TU3RDd7T8n8Np/wCfoeH9gz22c7PzYqNPQ9FBGFbWWzwL0JyHcFp+jHozmF76tbHfPAx22ua2Q==}
 
@@ -4857,6 +4910,33 @@ snapshots:
       - supports-color
       - tsx
       - yaml
+
+  turbo-darwin-64@2.8.12:
+    optional: true
+
+  turbo-darwin-arm64@2.8.12:
+    optional: true
+
+  turbo-linux-64@2.8.12:
+    optional: true
+
+  turbo-linux-arm64@2.8.12:
+    optional: true
+
+  turbo-windows-64@2.8.12:
+    optional: true
+
+  turbo-windows-arm64@2.8.12:
+    optional: true
+
+  turbo@2.8.12:
+    optionalDependencies:
+      turbo-darwin-64: 2.8.12
+      turbo-darwin-arm64: 2.8.12
+      turbo-linux-64: 2.8.12
+      turbo-linux-arm64: 2.8.12
+      turbo-windows-64: 2.8.12
+      turbo-windows-arm64: 2.8.12
 
   tw-animate-css@1.3.3: {}
 
