@@ -1,22 +1,22 @@
 'use client'
 
-import type { QuestionOption } from '@/lib/survey/types'
+import type { EngineOption } from '@/lib/engine/types'
 
 interface QuestionChoiceProps {
-  options: QuestionOption[]
-  onAnswer: (value: string) => void
+  options: EngineOption[]
+  onAnswer: (optionIndex: number) => void
 }
 
 export function QuestionChoice({ options, onAnswer }: QuestionChoiceProps) {
   return (
     <div className="flex flex-col gap-3">
-      {options.map((opt) => (
+      {options.map((opt, index) => (
         <button
-          key={opt.value}
-          onClick={() => onAnswer(opt.value)}
+          key={index}
+          onClick={() => onAnswer(index)}
           className="flex min-h-[52px] items-center justify-center rounded-2xl bg-card px-5 py-3.5 text-[15px] font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-secondary active:scale-[0.98]"
         >
-          {opt.label}
+          {opt.text}
         </button>
       ))}
     </div>

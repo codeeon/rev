@@ -63,6 +63,12 @@ export interface InferredHourPillar {
     percentage: number
   }>
   method: 'known' | 'survey' | 'approximate'
+  isCusp?: boolean
+  cuspCandidates?: [EarthlyBranch, EarthlyBranch]
+  mirroringData?: Array<{
+    questionText: string
+    selectedOptionText: string
+  }>
 }
 
 // 전체 사주 계산 결과

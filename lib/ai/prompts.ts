@@ -1,8 +1,13 @@
-import type { SajuResult, FiveElement } from '../saju/types'
+import type { SajuResult, FiveElement, InferredHourPillar } from '../saju/types'
 import { ELEMENT_KR } from '../saju/constants'
 
-export function buildAnalysisPrompt(result: SajuResult, surveySummary?: string): string {
-  const { fourPillars, fiveElements, dayMaster, dayMasterElement, dayMasterYinYang, inferredHour } = result
+interface PromptOptions {
+  sajuResult: SajuResult
+  inferredHour?: InferredHourPillar
+}
+
+export function buildAnalysisPrompt({ sajuResult, inferredHour }: PromptOptions): string {
+  const { fourPillars, fiveElements, dayMaster, dayMasterElement, dayMasterYinYang } = sajuResult
 
   const pillarStr = (label: string, p: typeof fourPillars.year) =>
     `${label}: ${p.stem}${p.branch} (${p.stemKr}${p.branchKr})`
@@ -20,19 +25,39 @@ export function buildAnalysisPrompt(result: SajuResult, surveySummary?: string):
 
   const yinYangKr = dayMasterYinYang === 'yang' ? '양(陽)' : '음(陰)'
 
-  let hourNote = ''
+  // 추론 메타 정보
+  let inferenceMeta = ''
   if (inferredHour) {
-    const methodKr = inferredHour.method === 'survey' ? '설문 추론' : '대략적 범위 추론'
-    hourNote = `\n\n참고: 시주는 ${methodKr} 기반입니다 (신뢰도: ${inferredHour.confidence}%).`
-    if (inferredHour.topCandidates.length > 1) {
-      const candidates = inferredHour.topCandidates
-        .map(c => `${c.branchKr}시(${c.percentage}%)`)
-        .join(', ')
-      hourNote += ` 상위 후보: ${candidates}`
+    const methodKr = inferredHour.method === 'survey' ? '설문 역추론' : '범위 추론'
+    inferenceMeta = `\n## 시주 추론 정보\n- 추론 방법: ${methodKr}\n- 신뢰도: ${inferredHour.confidence}%`
+
+    if (inferredHour.isCusp && inferredHour.cuspCandidates) {
+      const [a, b] = inferredHour.cuspCandidates
+      inferenceMeta += `\n- ⚠️ CUSP: ${a}시와 ${b}시가 거의 동등하게 경합 중`
     }
   }
 
-  return `당신은 30년 경력의 전문 사주 명리학자입니다. 전통적 명리학 이론에 기반하되, 현대인이 이해하기 쉬운 언어로 설명합니다.
+  // 미러링 근거 섹션
+  let mirroringSection = ''
+  if (inferredHour?.mirroringData && inferredHour.mirroringData.length > 0) {
+    const signals = inferredHour.mirroringData
+      .map(s => `- "${s.questionText}" 질문에서 "${s.selectedOptionText}"를 선택`)
+      .join('\n')
+    mirroringSection = `\n## 설문 기반 미러링 근거\n${signals}\n`
+  }
+
+  // CUSP 대응 지침
+  const cuspGuideline = inferredHour?.isCusp
+    ? `\n- CUSP 상황: 두 시진의 특성을 융합하여 조건부 해석을 제공할 것. 단정 금지.`
+    : ''
+
+  return `당신은 30년 경력의 전문 사주 명리학자이며, 따뜻한 상담가(Therapist)입니다.
+전통적 명리학 이론에 기반하되, 분석적이되 차갑지 않은 어조로 설명합니다.
+
+## 핵심 원칙
+- 단정형 절대 금지: "당신은 ~입니다" (X) → "~할 가능성이 높습니다 / ~하는 경향이 있습니다" (O)
+- Therapeutic Saju: 아래 미러링 근거를 인용하여, 해당 행동 패턴이 사주에 품어진 강점에서 비롯됨을 설명할 것
+- 신뢰도를 항상 %로 투명하게 제시할 것${cuspGuideline}
 
 ## 사주 원국
 
@@ -40,10 +65,8 @@ ${pillarsText}
 
 - 일간(日干): ${dayMaster} (${ELEMENT_KR[dayMasterElement]}, ${yinYangKr})
 - 오행 분포: ${elementsText}
-${hourNote}
-
-${surveySummary ? `## 설문 기반 성향 요약\n${surveySummary}\n` : ''}
-
+${inferenceMeta}
+${mirroringSection}
 ## 분석 요청
 
 다음 4개 항목에 대해 각각 200~300자 내외로 분석해주세요.
@@ -51,6 +74,7 @@ ${surveySummary ? `## 설문 기반 성향 요약\n${surveySummary}\n` : ''}
 
 ### 기본 성격 및 성향
 일간(日干)을 중심으로 기본 성격, 강점, 약점을 분석하세요.
+미러링 근거를 1~2개 인용하여, "당신이 ~하게 행동하는 이유는 사주의 ~기운 때문일 가능성이 높습니다"처럼 연결하세요.
 
 ### 재물운 및 직업운
 재성(財星)과 관성(官星)의 유무와 강약을 중심으로 분석하세요.
@@ -64,6 +88,5 @@ ${surveySummary ? `## 설문 기반 성향 요약\n${surveySummary}\n` : ''}
 주의사항:
 - 반드시 한국어로 답변하세요.
 - 명리학 용어는 괄호 안에 쉬운 설명을 추가하세요.
-- 긍정적인 톤을 유지하되, 솔직하게 분석하세요.
-- 점술적 표현보다 심리학적/실용적 조언에 가깝게 작성하세요.`
+- 긍정적인 톤을 유지하되, 분석적으로 작성하세요.`
 }

@@ -7,7 +7,7 @@ import { StepHeader } from '@/components/layout/step-header'
 import { PillarCard } from '@/components/saju/pillar-card'
 import { FiveElementsChart } from '@/components/saju/five-elements-chart'
 import { ELEMENT_KR, STEM_KR } from '@/lib/saju/constants'
-import { ChevronDown, ChevronUp, Share2, RotateCcw, MessageSquare } from 'lucide-react'
+import { ChevronDown, ChevronUp, RotateCcw, MessageSquare } from 'lucide-react'
 
 export default function ResultPage() {
   const router = useRouter()
@@ -160,6 +160,17 @@ export default function ResultPage() {
                       <span className="text-[11px] text-muted-foreground">{c.percentage}%</span>
                     </div>
                   ))}
+                </div>
+              )}
+              {inferredHour.isCusp && (
+                <div className="mt-3 rounded-xl bg-primary/5 px-4 py-3">
+                  <p className="text-[13px] font-semibold text-primary">
+                    두 시진이 경합 중이에요
+                  </p>
+                  <p className="mt-1 text-[12px] text-muted-foreground">
+                    두 시진의 기운이 거의 동등하게 나타났습니다.
+                    위 두 시진 모두 당신의 기운을 담고 있을 수 있어요.
+                  </p>
                 </div>
               )}
             </div>
