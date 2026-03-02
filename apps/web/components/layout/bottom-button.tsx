@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@workspace/base-ui/lib/utils'
 import { Button } from '@workspace/base-ui/components/button'
 
 interface BottomButtonProps {

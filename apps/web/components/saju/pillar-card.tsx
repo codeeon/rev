@@ -2,7 +2,7 @@
 
 import type { Pillar, FiveElement } from '@/lib/saju/types'
 import { ELEMENT_KR } from '@/lib/saju/constants'
-import { cn } from '@/lib/utils'
+import { cn } from '@workspace/base-ui/lib/utils'
 
 interface PillarCardProps {
   label: string
