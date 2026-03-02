@@ -84,6 +84,11 @@ export default function ResultPage() {
         {sections.length > 0 ? (
           <div className="flex flex-col gap-3">
             <h3 className="text-[16px] font-bold text-foreground">AI 사주 분석</h3>
+            {analysisResult?.parser?.usedFallback && (
+              <p className="rounded-xl border border-amber-300/60 bg-amber-50 px-3 py-2 text-[12px] text-amber-800">
+                AI 응답 형식이 예상과 달라 단일 섹션으로 정리해 표시했습니다.
+              </p>
+            )}
             {sections.map((section, i) => (
               <div key={i} className="overflow-hidden rounded-2xl bg-card shadow-sm">
                 <button
@@ -112,6 +117,9 @@ export default function ResultPage() {
         ) : analysisText ? (
           <div className="rounded-2xl bg-card p-5 shadow-sm">
             <h3 className="mb-3 text-[16px] font-bold text-foreground">AI 사주 분석</h3>
+            <p className="mb-3 rounded-xl border border-amber-300/60 bg-amber-50 px-3 py-2 text-[12px] text-amber-800">
+              AI 응답이 중간에 끊겼을 수 있어 원문 형태로 표시합니다.
+            </p>
             <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-foreground">
               {analysisText}
             </p>

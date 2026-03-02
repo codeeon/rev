@@ -3,7 +3,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
-import { analyzeSaju, isValidBirthInfo, isValidInferredHour } from '@workspace/saju-core'
+import { parseAnalysisSections } from '@/lib/ai/analysis-sections'
+import { resolveAnalyzeStreamBuffer } from '@/lib/ai/stream-protocol'
+import { isValidBirthInfo, isValidInferredHour } from '@workspace/saju-core'
 
 const LOADING_MESSAGES = [
   '사주 원국을 세우고 있어요...',
@@ -69,18 +71,8 @@ export default function AnalyzingPage() {
 
       const birthInfo = birthInfoCandidate
       const inferredHour = inferredHourCandidate
-
-      let sajuResult
-      try {
-        sajuResult = analyzeSaju(birthInfo, inferredHour)
-      } catch {
-        dispatch({ type: 'SET_ANALYZING', payload: false })
-        router.push('/input')
-        return
-      }
-
-      dispatch({ type: 'SET_SAJU_RESULT', payload: sajuResult })
       dispatch({ type: 'SET_ANALYZING', payload: true })
+      let hasAuthoritativeSajuResult = false
 
       try {
 
@@ -100,25 +92,67 @@ export default function AnalyzingPage() {
         const reader = response.body?.getReader()
         const decoder = new TextDecoder()
         let fullText = ''
+        let protocolBuffer = ''
+        let protocolResolved = false
+
+        const appendVisibleText = (incomingChunk: string, flush = false) => {
+          if (protocolResolved) {
+            if (incomingChunk) {
+              fullText += incomingChunk
+              dispatch({ type: 'APPEND_ANALYSIS_TEXT', payload: incomingChunk })
+            }
+            return
+          }
+
+          protocolBuffer += incomingChunk
+          const resolved = resolveAnalyzeStreamBuffer(protocolBuffer, flush)
+          if (!resolved) {
+            return
+          }
+
+          protocolResolved = true
+          protocolBuffer = ''
+
+          if (resolved.meta) {
+            hasAuthoritativeSajuResult = true
+            dispatch({ type: 'SET_SAJU_RESULT', payload: resolved.meta.sajuResult })
+          }
+
+          if (resolved.text) {
+            fullText += resolved.text
+            dispatch({ type: 'APPEND_ANALYSIS_TEXT', payload: resolved.text })
+          }
+        }
 
         if (reader) {
           while (true) {
             const { done, value } = await reader.read()
             if (done) break
             const chunk = decoder.decode(value, { stream: true })
-            fullText += chunk
-            dispatch({ type: 'APPEND_ANALYSIS_TEXT', payload: chunk })
+            appendVisibleText(chunk)
           }
+
+          appendVisibleText(decoder.decode(), true)
+        } else {
+          throw new Error('Missing response body stream')
         }
 
         // Parse sections from the full text
-        const sections = parseAnalysisSections(fullText)
+        if (!hasAuthoritativeSajuResult) {
+          throw new Error('Missing analysis metadata')
+        }
+
+        const parsedSections = parseAnalysisSections(fullText)
         dispatch({
           type: 'SET_ANALYSIS_RESULT',
           payload: {
-            sections,
-            summary: sections[0]?.content.slice(0, 100) || '',
+            sections: parsedSections.sections,
+            summary: parsedSections.sections[0]?.content.slice(0, 100) || '',
             rawText: fullText,
+            parser: {
+              usedFallback: parsedSections.usedFallback,
+              sectionCount: parsedSections.sections.length,
+            },
           },
         })
 
@@ -132,7 +166,7 @@ export default function AnalyzingPage() {
         dispatch({ type: 'SET_ANALYZING', payload: false })
         setProgress(100)
         setTimeout(() => {
-          router.push('/result')
+          router.push(hasAuthoritativeSajuResult ? '/result' : '/input')
         }, 500)
       }
     }
@@ -184,25 +218,4 @@ export default function AnalyzingPage() {
       `}</style>
     </div>
   )
-}
-
-function parseAnalysisSections(text: string): Array<{ title: string; content: string }> {
-  const sections: Array<{ title: string; content: string }> = []
-  const regex = /###\s*(.+?)(?:\n|$)([\s\S]*?)(?=###|$)/g
-  let match
-
-  while ((match = regex.exec(text)) !== null) {
-    const title = match[1].trim()
-    const content = match[2].trim()
-    if (title && content) {
-      sections.push({ title, content })
-    }
-  }
-
-  // Fallback if no sections found
-  if (sections.length === 0 && text.trim()) {
-    sections.push({ title: '사주 분석', content: text.trim() })
-  }
-
-  return sections
 }
