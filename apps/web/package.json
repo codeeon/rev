@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:engine": "rm -rf .tmp-test && tsc --outDir .tmp-test --module commonjs --moduleResolution node --target es2020 --resolveJsonModule --esModuleInterop --skipLibCheck --types node lib/engine/scoring.test.ts lib/survey/weight-engine.test.ts && node --test .tmp-test/apps/web/lib/engine/scoring.test.js .tmp-test/apps/web/lib/survey/weight-engine.test.js && rm -rf .tmp-test"
+    "typecheck": "tsc --noEmit",
+    "test:engine": "rm -rf .tmp-test && tsc --outDir .tmp-test --module node16 --moduleResolution node16 --target es2020 --resolveJsonModule --esModuleInterop --skipLibCheck --types node lib/engine/scoring.test.ts lib/survey/weight-engine.test.ts && node --test .tmp-test/engine/scoring.test.js .tmp-test/survey/weight-engine.test.js && rm -rf .tmp-test"
   },
   "dependencies": {
     "@workspace/base-ui": "workspace:*",
+    "@workspace/engine-data": "workspace:*",
     "@vercel/analytics": "catalog:",
     "ai": "catalog:",
     "clsx": "catalog:",

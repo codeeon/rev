@@ -1,4 +1,4 @@
-import engineJson from '../../../../docs/data/engine.json'
+import engineJson from '@workspace/engine-data/data/engine.json'
 import type { EngineQuestion, EngineSettings } from './types'
 import type { ZishiName } from '../survey/types'
 
