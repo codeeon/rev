@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Sparkles, Clock, Brain, BarChart3 } from 'lucide-react'
+import { ENGINE_QUESTIONS } from '@workspace/time-inference'
 
 const steps = [
   {
@@ -12,7 +13,7 @@ const steps = [
   {
     icon: Brain,
     title: 'AI 성향 분석',
-    description: '12개의 짧은 질문에 답하기',
+    description: `${ENGINE_QUESTIONS.length}개의 짧은 질문에 답하기`,
   },
   {
     icon: BarChart3,
