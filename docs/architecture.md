@@ -13,6 +13,10 @@
 
 애플리케이션은 Next.js App Router 기반이며, 도메인/운영 연동 로직은 워크스페이스 패키지로 분리되어 있다.
 
+운영 연동 실무 절차(설정/검증/장애 대응)는 아래 사용 가이드를 함께 참고한다.
+
+- `docs/operations/integration/google-sheets-usage-guide.md`
+
 ## 2. 모노레포 구조
 
 ```text
@@ -145,6 +149,15 @@ rev-workspace/
 - `GOOGLE_SERVICE_ACCOUNT_TOKEN_URI` (선택)
 - `GOOGLE_SERVICE_ACCOUNT_SCOPES` (선택)
 - `GOOGLE_SERVICE_ACCOUNT_SUBJECT` (선택)
+
+환경 변수 템플릿 위치:
+
+- `apps/web/.env.example`
+- `packages/operations/google-sheets/.env.example`
+
+Git 정책:
+
+- `**/.env.example`만 추적하고, 그 외 `.env*`/`.envrc`는 ignore 처리한다.
 
 ## 5. 패키지 아키텍처
 
