@@ -1,21 +1,68 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { QuestionChoice } from '@/components/survey/question-choice'
-import { ENGINE_QUESTIONS, inferZishi, toInferredHourPillar, type SurveyAnswer } from '@workspace/time-inference'
+import {
+  ENGINE_QUESTIONS,
+  ENGINE_SETTINGS,
+  inferZishi,
+  toInferredHourPillar,
+  type EngineQuestion,
+  type SurveyAnswer,
+} from '@workspace/time-inference'
 
 export default function SurveyPage() {
   const router = useRouter()
   const { state, dispatch } = useAppState()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<SurveyAnswer[]>([])
+  const [questions, setQuestions] = useState<EngineQuestion[]>(ENGINE_QUESTIONS)
   const [isAnimating, setIsAnimating] = useState(false)
   const [slideDirection, setSlideDirection] = useState<'in' | 'out'>('in')
 
-  const totalQuestions = ENGINE_QUESTIONS.length  // 20
-  const question = ENGINE_QUESTIONS[currentIndex]
+  useEffect(() => {
+    void (async () => {
+      const response = await fetch('/api/operations/questions', {
+        method: 'GET',
+        cache: 'no-store',
+      }).catch(() => null)
+
+      if (!response || !response.ok) {
+        return
+      }
+
+      const payload: unknown = await response.json().catch(() => null)
+      if (!payload || typeof payload !== 'object') {
+        return
+      }
+
+      const payloadRecord = payload as Record<string, unknown>
+      if (payloadRecord.questionVersion !== ENGINE_SETTINGS.version) {
+        return
+      }
+
+      const payloadQuestions = payloadRecord.questions
+      if (!Array.isArray(payloadQuestions) || payloadQuestions.length === 0) {
+        return
+      }
+
+      const firstQuestion = payloadQuestions[0]
+      if (!firstQuestion || typeof firstQuestion !== 'object') {
+        return
+      }
+
+      if (typeof (firstQuestion as { id?: unknown }).id !== 'string') {
+        return
+      }
+
+      setQuestions(payloadQuestions as EngineQuestion[])
+    })()
+  }, [])
+
+  const totalQuestions = questions.length
+  const question = questions[currentIndex]
 
   const handleAnswer = useCallback(
     (optionIndex: number) => {
@@ -52,6 +99,16 @@ export default function SurveyPage() {
     },
     [currentIndex, answers, dispatch, isAnimating, question, router, state.approximateRange, state.birthTimeKnowledge, totalQuestions]
   )
+
+  useEffect(() => {
+    if (!question) {
+      router.push('/time')
+    }
+  }, [question, router])
+
+  if (!question) {
+    return null
+  }
 
   function handleBack() {
     if (currentIndex > 0) {

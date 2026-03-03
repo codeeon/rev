@@ -144,6 +144,9 @@ catalogs:
     vaul:
       specifier: ^1.1.2
       version: 1.1.2
+    zod:
+      specifier: ^3.24.1
+      version: 3.25.76
   react19:
     '@types/react':
       specifier: 19.2.14
@@ -211,9 +214,15 @@ importers:
       '@workspace/base-ui':
         specifier: workspace:*
         version: link:../../packages/design-systems/base-ui
+      '@workspace/google-sheets':
+        specifier: workspace:*
+        version: link:../../packages/operations/google-sheets
       '@workspace/saju-core':
         specifier: workspace:*
         version: link:../../packages/domain/saju-core
+      '@workspace/spreadsheet-admin':
+        specifier: workspace:*
+        version: link:../../packages/operations/spreadsheet-admin
       '@workspace/time-inference':
         specifier: workspace:*
         version: link:../../packages/domain/time-inference
@@ -466,6 +475,46 @@ importers:
       '@workspace/saju-core':
         specifier: workspace:*
         version: link:../saju-core
+    devDependencies:
+      '@types/node':
+        specifier: catalog:tooling
+        version: 22.19.11
+      tsup:
+        specifier: catalog:tooling
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.7.3)
+      tsx:
+        specifier: catalog:tooling
+        version: 4.21.0
+      typescript:
+        specifier: catalog:tooling
+        version: 5.7.3
+
+  packages/operations/google-sheets:
+    devDependencies:
+      '@types/node':
+        specifier: catalog:tooling
+        version: 22.19.11
+      tsup:
+        specifier: catalog:tooling
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.7.3)
+      tsx:
+        specifier: catalog:tooling
+        version: 4.21.0
+      typescript:
+        specifier: catalog:tooling
+        version: 5.7.3
+
+  packages/operations/spreadsheet-admin:
+    dependencies:
+      '@workspace/google-sheets':
+        specifier: workspace:*
+        version: link:../google-sheets
+      '@workspace/time-inference':
+        specifier: workspace:*
+        version: link:../../domain/time-inference
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: catalog:tooling

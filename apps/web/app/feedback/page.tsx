@@ -6,6 +6,7 @@ import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { BottomButton } from '@/components/layout/bottom-button'
 import { Star, Check } from 'lucide-react'
+import { ENGINE_SETTINGS } from '@workspace/time-inference'
 
 const ACCURACY_OPTIONS = [
   { label: '정확히 맞는 것 같아요', value: 'accurate' },
@@ -20,12 +21,69 @@ export default function FeedbackPage() {
   const [rating, setRating] = useState(0)
   const [accuracy, setAccuracy] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const isInferred = !!state.inferredHour
 
-  function handleSubmit() {
-    // In MVP, just show thank you (no DB save)
-    setSubmitted(true)
+  async function handleSubmit() {
+    if (isSubmitting) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    const topCandidates = state.inferredHour?.topCandidates ?? []
+    const top1Percentage = topCandidates[0]?.percentage ?? 0
+    const top2Percentage = topCandidates[1]?.percentage ?? top1Percentage
+
+    const payload = {
+      sessionId:
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `session-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      engineVersion: ENGINE_SETTINGS.version,
+      questionVersion: ENGINE_SETTINGS.version,
+      birthTimeKnowledge: state.birthTimeKnowledge ?? 'unknown',
+      approximateRange: state.birthTimeKnowledge === 'approximate' ? state.approximateRange : undefined,
+      surveyAnswers: state.surveyAnswers,
+      inferenceResult: {
+        inferredZishi: state.inferredHour?.branchKr ?? 'known-hour',
+        confidence: state.inferredHour?.confidence ?? 100,
+        isCusp: !!state.inferredHour?.isCusp,
+        topCandidates: topCandidates.map(candidate => ({
+          branch: candidate.branch,
+          branchKr: candidate.branchKr,
+          score: candidate.score,
+          percentage: candidate.percentage,
+        })),
+      },
+      monitoring: {
+        top1Prob: top1Percentage / 100,
+        top2Gap: Math.max(0, (top1Percentage - top2Percentage) / 100),
+        stdSoftmax: 0,
+        stdRawScore: 0,
+        roleInfluence: {},
+        alerts: {},
+      },
+      feedback: {
+        rating,
+        accuracy: accuracy || undefined,
+      },
+    }
+
+    try {
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      }).catch(() => null)
+    } finally {
+      setIsSubmitting(false)
+      setSubmitted(true)
+    }
   }
 
   if (submitted) {
@@ -119,9 +177,9 @@ export default function FeedbackPage() {
 
       <BottomButton
         onClick={handleSubmit}
-        disabled={rating === 0}
+        disabled={rating === 0 || isSubmitting}
       >
-        피드백 보내기
+        {isSubmitting ? '전송 중...' : '피드백 보내기'}
       </BottomButton>
     </div>
   )

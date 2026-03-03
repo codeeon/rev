@@ -8,12 +8,14 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "pnpm dlx tsx --test app/api/analyze/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts",
+    "test": "pnpm dlx tsx --test app/api/analyze/route.test.ts app/api/operations/questions/route.test.ts app/api/feedback/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts",
     "test:engine": "pnpm --filter @workspace/time-inference test"
   },
   "dependencies": {
     "@workspace/base-ui": "workspace:*",
+    "@workspace/google-sheets": "workspace:*",
     "@workspace/saju-core": "workspace:*",
+    "@workspace/spreadsheet-admin": "workspace:*",
     "@workspace/time-inference": "workspace:*",
     "@vercel/analytics": "catalog:",
     "ai": "catalog:",
