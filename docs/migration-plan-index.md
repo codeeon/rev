@@ -43,6 +43,7 @@
 운영/연동 문서(마이그레이션 직접 범위 외):
 
 - `docs/operations/integration/spreadsheet-admin-integration-principles.md`
+- `docs/operations/integration/google-sheets-package-architecture.md`
 - `docs/operations/tuning/engine-tuning-next-actions-plan.md`
 - `docs/operations/tuning/engine-parameter-tuning-playbook.md`
 

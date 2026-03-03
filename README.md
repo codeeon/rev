@@ -9,6 +9,8 @@ Monorepo for the Reverse Saju web product, domain engine packages, and design sy
 - `packages/domain/time-inference`: Survey-based hour inference engine
 - `packages/domain/engine-data`: Engine JSON data package
 - `packages/design-systems/base-ui`: Shared UI components
+- `packages/operations/google-sheets`: Server-only Google Sheets transport/auth adapter
+- `packages/operations/spreadsheet-admin`: Spreadsheet schema normalization and sync orchestration
 - `docs/`: migration, operations, and archived references
 
 ## Dependency rules
@@ -17,6 +19,7 @@ Monorepo for the Reverse Saju web product, domain engine packages, and design sy
 - Domain packages can depend on other domain packages when the dependency direction is explicit.
 - `@workspace/time-inference` consumes `@workspace/engine-data` and `@workspace/saju-core`.
 - `@workspace/base-ui` is the shared UI layer used by the app.
+- Operations packages can depend on domain and integration packages, but domain packages must not depend on operations packages.
 
 ## Standard commands
 
@@ -29,6 +32,7 @@ Monorepo for the Reverse Saju web product, domain engine packages, and design sy
 
 ## Documentation entry points
 
+- `docs/architecture.md`: current system architecture (runtime, domain boundaries, build pipeline)
 - `docs/migration-plan-index.md`: execution order for migration docs
 - `docs/migration/domain-boundary-notes.md`: current domain boundary decisions
 - `docs/operations/README.md`: operations and integration guides
