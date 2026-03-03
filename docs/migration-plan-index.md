@@ -44,6 +44,7 @@
 
 - `docs/operations/integration/spreadsheet-admin-integration-principles.md`
 - `docs/operations/integration/google-sheets-package-architecture.md`
+- `docs/operations/integration/google-sheets-usage-guide.md`
 - `docs/operations/tuning/engine-tuning-next-actions-plan.md`
 - `docs/operations/tuning/engine-parameter-tuning-playbook.md`
 

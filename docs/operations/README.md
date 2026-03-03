@@ -7,6 +7,7 @@
 - `integration/`
   - `spreadsheet-admin-integration-principles.md`
   - `google-sheets-package-architecture.md`
+  - `google-sheets-usage-guide.md`
 - `tuning/`
   - `engine-parameter-tuning-playbook.md`
   - `engine-tuning-next-actions-plan.md`

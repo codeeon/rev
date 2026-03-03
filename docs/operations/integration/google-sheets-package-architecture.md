@@ -10,6 +10,10 @@
 - `@workspace/google-sheets` (`packages/operations/google-sheets`)
 - `@workspace/spreadsheet-admin` (`packages/operations/spreadsheet-admin`)
 
+실제 운영 설정/검증 절차는 아래 사용 가이드를 함께 참고한다.
+
+- `docs/operations/integration/google-sheets-usage-guide.md`
+
 ## 2) 설계 원칙
 
 `docs/operations/integration/spreadsheet-admin-integration-principles.md`의 비협상 원칙을 구현 계층에 그대로 반영한다.
