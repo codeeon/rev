@@ -29,6 +29,7 @@
     "next-themes": "catalog:",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
+    "server-only": "workspace:*",
     "tailwind-merge": "catalog:"
   },
   "devDependencies": {

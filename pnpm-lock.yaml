@@ -259,6 +259,9 @@ importers:
       react-dom:
         specifier: catalog:react19
         version: 19.2.4(react@19.2.4)
+      server-only:
+        specifier: workspace:*
+        version: link:../../packages/server-only
       tailwind-merge:
         specifier: 'catalog:'
         version: 3.5.0
@@ -584,6 +587,8 @@ importers:
       typescript:
         specifier: catalog:tooling
         version: 5.7.3
+
+  packages/server-only: {}
 
 packages:
 
