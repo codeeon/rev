@@ -31,6 +31,14 @@ export default function FeedbackPage() {
     trackPage('/feedback', 'Feedback')
   }, [])
 
+  function readSavedFlag(payload: unknown): boolean {
+    if (!payload || typeof payload !== 'object') {
+      return false
+    }
+
+    return (payload as { saved?: unknown }).saved === true
+  }
+
   async function handleSubmit() {
     if (isSubmitting) {
       return
@@ -87,11 +95,13 @@ export default function FeedbackPage() {
         },
         body: JSON.stringify(payload),
       }).catch(() => null)
+      const responseBody: unknown = response ? await response.json().catch(() => null) : null
+      const feedbackSaved = readSavedFlag(responseBody)
 
       trackFunnelEvent('submit_feedback', {
         label: accuracy || 'unset',
         value: rating,
-        feedback_saved: response?.ok ? 1 : 0,
+        feedback_saved: feedbackSaved ? 1 : 0,
         birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
       })
 

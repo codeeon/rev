@@ -15,22 +15,30 @@ export type FunnelEventName =
   | 'submit_feedback'
 
 export function trackFunnelEvent(action: FunnelEventName, payload: Omit<GaEvent, 'action'> = {}): void {
-  const commonParams = getCommonEventParams()
+  try {
+    const commonParams = getCommonEventParams()
 
-  trackEvent({
-    action,
-    category: 'funnel',
-    ...commonParams,
-    ...payload,
-  })
+    trackEvent({
+      action,
+      category: 'funnel',
+      ...commonParams,
+      ...payload,
+    })
+  } catch {
+    // Never let analytics block the user flow.
+  }
 }
 
 export function trackPage(path: string, title?: string): void {
-  trackPageView({
-    page_path: path,
-    page_title: title,
-    page_location: typeof window !== 'undefined' ? window.location.href : undefined,
-  })
+  try {
+    trackPageView({
+      page_path: path,
+      page_title: title,
+      page_location: typeof window !== 'undefined' ? window.location.href : undefined,
+    })
+  } catch {
+    // Never let analytics block the user flow.
+  }
 }
 
 const SESSION_KEY = 'rev_analytics_session_id'
@@ -49,15 +57,19 @@ function getSessionId(): string | undefined {
     return undefined
   }
 
-  const stored = window.localStorage.getItem(SESSION_KEY)
-  if (stored) {
-    return stored
-  }
+  try {
+    const stored = window.localStorage.getItem(SESSION_KEY)
+    if (stored) {
+      return stored
+    }
 
-  const created =
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `session-${Date.now()}`
-  window.localStorage.setItem(SESSION_KEY, created)
-  return created
+    const created =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `session-${Date.now()}`
+    window.localStorage.setItem(SESSION_KEY, created)
+    return created
+  } catch {
+    return undefined
+  }
 }

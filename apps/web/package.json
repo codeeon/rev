@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "tsx --test app/api/analyze/route.test.ts app/api/operations/questions/route.test.ts app/api/feedback/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts",
+    "test": "tsx --test app/api/analyze/route.test.ts app/api/operations/questions/route.test.ts app/api/feedback/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts lib/analytics.test.ts",
     "test:engine": "pnpm --filter @workspace/time-inference test"
   },
   "dependencies": {
