@@ -56,6 +56,15 @@
 - 도메인 export 배럴: `packages/domain/saju-core/src/index.ts`
 - 도메인 검증 테스트: `packages/domain/saju-core/src/validation.spec.ts`
 
+## 추가 구현 문서
+
+pre-analysis 퍼널을 `@use-funnel/next`로 정리하기 위한 별도 문서 묶음:
+
+- `docs/funnel/README.md`
+- `docs/funnel/use-funnel-adoption-design.md`
+- `docs/funnel/use-funnel-implementation-order.md`
+- `docs/funnel/use-funnel-phase-1-checklist.md`
+
 ## 검증 명령
 
 - 도메인 validator 테스트

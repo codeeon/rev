@@ -11,6 +11,9 @@ Monorepo for the Reverse Saju web product, domain engine packages, and design sy
 - `packages/design-systems/base-ui`: Shared UI components
 - `packages/operations/google-sheets`: Server-only Google Sheets transport/auth adapter
 - `packages/operations/spreadsheet-admin`: Spreadsheet schema normalization and sync orchestration
+- `packages/operations/observability-core`: Observability environment and context helpers
+- `packages/operations/ga`: GA4 script/event helpers
+- `packages/operations/sentry`: Sentry browser/server/edge config builders
 - `docs/`: migration, operations, and archived references
 
 ## Dependency rules
@@ -33,6 +36,8 @@ Monorepo for the Reverse Saju web product, domain engine packages, and design sy
 ## Documentation entry points
 
 - `docs/architecture.md`: current system architecture (runtime, domain boundaries, build pipeline)
+- `docs/funnel/README.md`: pre-analysis funnel refactor docs (`@use-funnel/next` adoption)
 - `docs/migration-plan-index.md`: execution order for migration docs
 - `docs/migration/domain-boundary-notes.md`: current domain boundary decisions
 - `docs/operations/README.md`: operations and integration guides
+- `docs/operations/observability/README.md`: GA/Sentry setup and runbook

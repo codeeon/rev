@@ -8,6 +8,12 @@
   - `spreadsheet-admin-integration-principles.md`
   - `google-sheets-package-architecture.md`
   - `google-sheets-usage-guide.md`
+- `observability/`
+  - `README.md`
+  - `ga.md`
+  - `sentry.md`
+  - `sentry-setup-validation.md`
+  - `runbook.md`
 - `tuning/`
   - `engine-parameter-tuning-playbook.md`
   - `engine-tuning-next-actions-plan.md`
