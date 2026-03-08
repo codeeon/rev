@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { BottomButton } from '@/components/layout/bottom-button'
 import { Star, Check } from 'lucide-react'
 import { ENGINE_SETTINGS } from '@workspace/time-inference'
+import { trackFunnelEvent, trackPage } from '@/lib/analytics'
 
 const ACCURACY_OPTIONS = [
   { label: '정확히 맞는 것 같아요', value: 'accurate' },
@@ -20,10 +21,15 @@ export default function FeedbackPage() {
   const { state } = useAppState()
   const [rating, setRating] = useState(0)
   const [accuracy, setAccuracy] = useState('')
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const isInferred = !!state.inferredHour
+
+  useEffect(() => {
+    trackPage('/feedback', 'Feedback')
+  }, [])
 
   async function handleSubmit() {
     if (isSubmitting) {
@@ -31,6 +37,7 @@ export default function FeedbackPage() {
     }
 
     setIsSubmitting(true)
+    setSubmitError(null)
 
     const topCandidates = state.inferredHour?.topCandidates ?? []
     const top1Percentage = topCandidates[0]?.percentage ?? 0
@@ -73,16 +80,29 @@ export default function FeedbackPage() {
     }
 
     try {
-      await fetch('/api/feedback', {
+      const response = await fetch('/api/feedback', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
       }).catch(() => null)
+
+      trackFunnelEvent('submit_feedback', {
+        label: accuracy || 'unset',
+        value: rating,
+        feedback_saved: response?.ok ? 1 : 0,
+        birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
+      })
+
+      if (!response?.ok) {
+        setSubmitError('피드백을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.')
+        return
+      }
+
+      setSubmitted(true)
     } finally {
       setIsSubmitting(false)
-      setSubmitted(true)
     }
   }
 
@@ -174,6 +194,14 @@ export default function FeedbackPage() {
           </div>
         )}
       </div>
+
+      {submitError && (
+        <div className="px-5 pb-3">
+          <p className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
+            {submitError}
+          </p>
+        </div>
+      )}
 
       <BottomButton
         onClick={handleSubmit}

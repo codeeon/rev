@@ -6,6 +6,7 @@ import { useAppState } from '@/lib/store'
 import { parseAnalysisSections } from '@/lib/ai/analysis-sections'
 import { resolveAnalyzeStreamBuffer } from '@/lib/ai/stream-protocol'
 import { isValidBirthInfo, isValidInferredHour } from '@workspace/saju-core'
+import { trackFunnelEvent } from '@/lib/analytics'
 
 const LOADING_MESSAGES = [
   '사주 원국을 세우고 있어요...',
@@ -155,6 +156,10 @@ export default function AnalyzingPage() {
             },
           },
         })
+        trackFunnelEvent('analysis_success', {
+          value: parsedSections.sections.length,
+          birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
+        })
 
         setProgress(100)
         dispatch({ type: 'SET_ANALYZING', payload: false })
@@ -163,6 +168,9 @@ export default function AnalyzingPage() {
           router.push('/result')
         }, 500)
       } catch {
+        trackFunnelEvent('analysis_failure', {
+          birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
+        })
         dispatch({ type: 'SET_ANALYZING', payload: false })
         setProgress(100)
         setTimeout(() => {

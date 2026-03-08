@@ -6,6 +6,7 @@ import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { BottomButton } from '@/components/layout/bottom-button'
 import { BRANCH_HOURS, BRANCH_KR, hourToBranch, type EarthlyBranch } from '@workspace/saju-core'
+import { trackFunnelEvent } from '@/lib/analytics'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
@@ -42,6 +43,7 @@ function TimePageContent() {
 
   function handleExactSubmit() {
     if (typeof hour !== 'number') return
+    trackFunnelEvent('submit_known_time', { value: hour })
     dispatch({ type: 'SET_INFERRED_HOUR', payload: null })
     dispatch({ type: 'SET_SURVEY_ANSWERS', payload: [] })
     dispatch({ type: 'SET_APPROXIMATE_RANGE', payload: null })
@@ -59,6 +61,7 @@ function TimePageContent() {
   function handleApproximateSubmit() {
     if (selectedRange === null) return
     const range = APPROXIMATE_RANGES[selectedRange]
+    trackFunnelEvent('submit_approximate_time', { label: range.label })
     dispatch({
       type: 'SET_APPROXIMATE_RANGE',
       payload: { start: range.start, end: range.end },

@@ -6,6 +6,7 @@ import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { BottomButton } from '@/components/layout/bottom-button'
 import { getMaxBirthDay, MAX_BIRTH_YEAR, MIN_BIRTH_YEAR } from '@workspace/saju-core'
+import { trackFunnelEvent } from '@/lib/analytics'
 
 const YEARS = Array.from({ length: MAX_BIRTH_YEAR - MIN_BIRTH_YEAR + 1 }, (_, i) => MAX_BIRTH_YEAR - i)
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -37,6 +38,10 @@ export default function InputPage() {
 
   function handleNext() {
     if (!isValid) return
+    trackFunnelEvent('submit_birth_info', {
+      label: isLunar ? 'lunar' : 'solar',
+      value: typeof year === 'number' ? year : undefined,
+    })
     dispatch({
       type: 'SET_BIRTH_INFO',
       payload: {

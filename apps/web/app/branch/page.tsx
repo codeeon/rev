@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
 import { Clock, HelpCircle, Clock4 } from 'lucide-react'
+import { trackFunnelEvent } from '@/lib/analytics'
 
 const options = [
   {
@@ -31,6 +32,7 @@ export default function BranchPage() {
   const { dispatch } = useAppState()
 
   function handleSelect(value: 'known' | 'unknown' | 'approximate') {
+    trackFunnelEvent('select_birth_time_knowledge', { label: value })
     dispatch({ type: 'SET_BIRTH_TIME_KNOWLEDGE', payload: value })
 
     switch (value) {

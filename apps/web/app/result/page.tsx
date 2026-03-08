@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { StepHeader } from '@/components/layout/step-header'
@@ -8,6 +8,7 @@ import { PillarCard } from '@/components/saju/pillar-card'
 import { FiveElementsChart } from '@/components/saju/five-elements-chart'
 import { ELEMENT_KR, STEM_KR } from '@workspace/saju-core'
 import { ChevronDown, ChevronUp, RotateCcw, MessageSquare } from 'lucide-react'
+import { trackFunnelEvent, trackPage } from '@/lib/analytics'
 
 export default function ResultPage() {
   const router = useRouter()
@@ -15,6 +16,21 @@ export default function ResultPage() {
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({ 0: true })
 
   const { sajuResult, analysisResult, analysisText } = state
+  const inferredHourConfidence = sajuResult?.inferredHour?.confidence
+  const isInferred = Boolean(sajuResult?.inferredHour)
+
+  useEffect(() => {
+    if (!sajuResult) {
+      return
+    }
+
+    trackPage('/result', 'Result')
+    trackFunnelEvent('view_result', {
+      label: isInferred ? 'inferred-hour' : 'known-hour',
+      value: inferredHourConfidence,
+      birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
+    })
+  }, [inferredHourConfidence, isInferred, sajuResult, state.birthTimeKnowledge])
 
   // Redirect if no result
   if (!sajuResult) {
@@ -34,7 +50,6 @@ export default function ResultPage() {
   }
 
   const { fourPillars, fiveElements, dominantElement, weakestElement, dayMaster, dayMasterElement, dayMasterYinYang, inferredHour } = sajuResult
-  const isInferred = !!inferredHour
   const name = state.birthInfo.name
 
   function toggleSection(index: number) {

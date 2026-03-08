@@ -12,6 +12,7 @@ import {
   type EngineQuestion,
   type SurveyAnswer,
 } from '@workspace/time-inference'
+import { trackFunnelEvent } from '@/lib/analytics'
 
 export default function SurveyPage() {
   const router = useRouter()
@@ -87,6 +88,11 @@ export default function SurveyPage() {
         // 설문 완료 — 엔진 실행
         const surveyResult = inferZishi(updatedAnswers, {
           approximateRange: state.birthTimeKnowledge === 'approximate' ? state.approximateRange : null,
+        })
+        trackFunnelEvent('complete_survey', {
+          label: surveyResult.inferredZishi,
+          value: surveyResult.confidence,
+          birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
         })
         const inferredMethod = state.birthTimeKnowledge === 'approximate' ? 'approximate' : 'survey'
         const inferredHour = toInferredHourPillar(surveyResult, inferredMethod)
