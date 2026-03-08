@@ -1,19 +1,10 @@
 import { NextResponse } from 'next/server'
-import { syncQuestionsFromSpreadsheet, type QuestionSyncResponse } from '@/lib/operations/spreadsheet'
-
-type QuestionSyncResolver = () => Promise<QuestionSyncResponse>
-
-let questionSyncResolverForTest: QuestionSyncResolver | null = null
-
-export function __setQuestionSyncResolverForTest(resolver: QuestionSyncResolver | null): void {
-  questionSyncResolverForTest = resolver
-}
+import { syncQuestionsFromSpreadsheet } from '@/lib/operations/spreadsheet'
+import { getQuestionSyncResolver } from './route-deps'
 
 export async function GET() {
   try {
-    const payload = questionSyncResolverForTest
-      ? await questionSyncResolverForTest()
-      : await syncQuestionsFromSpreadsheet()
+    const payload = await getQuestionSyncResolver()()
 
     return NextResponse.json(payload)
   } catch {

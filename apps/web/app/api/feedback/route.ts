@@ -1,14 +1,6 @@
 import { NextResponse } from 'next/server'
 import { type AnalysisResultRecord, validateAnalysisResultRecord } from '@workspace/spreadsheet-admin/server'
-import { saveAnalysisResultToSpreadsheet, type SaveResultResponse } from '@/lib/operations/spreadsheet'
-
-type FeedbackResultSaver = (record: AnalysisResultRecord) => Promise<SaveResultResponse>
-
-let feedbackResultSaverForTest: FeedbackResultSaver | null = null
-
-export function __setFeedbackResultSaverForTest(saver: FeedbackResultSaver | null): void {
-  feedbackResultSaverForTest = saver
-}
+import { getFeedbackResultSaver } from './route-deps'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
@@ -277,9 +269,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid feedback payload' }, { status: 400 })
   }
 
-  const result = feedbackResultSaverForTest
-    ? await feedbackResultSaverForTest(parsedRecord)
-    : await saveAnalysisResultToSpreadsheet(parsedRecord)
+  const result = await getFeedbackResultSaver()(parsedRecord)
 
   if (result.saved) {
     return NextResponse.json({ saved: true })

@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { ENGINE_SETTINGS } from '@workspace/time-inference'
-import { GET, __setQuestionSyncResolverForTest } from './route'
+import { setQuestionSyncResolverForTest } from './route-deps'
+import { GET } from './route'
 
 const ENV_KEYS = [
   'GOOGLE_SPREADSHEET_ADMIN_ID',
@@ -20,7 +21,7 @@ test.beforeEach(() => {
 })
 
 test.afterEach(() => {
-  __setQuestionSyncResolverForTest(null)
+  setQuestionSyncResolverForTest(null)
 
   for (const key of ENV_KEYS) {
     const value = envBackup[key]
@@ -44,7 +45,7 @@ test('GET returns engine-default questions when spreadsheet sync is not configur
 })
 
 test('GET uses injected resolver payload in tests', async () => {
-  __setQuestionSyncResolverForTest(async () => ({
+  setQuestionSyncResolverForTest(async () => ({
     source: 'spreadsheet-latest',
     questionVersion: '2026.03.03',
     questions: [],
@@ -59,7 +60,7 @@ test('GET uses injected resolver payload in tests', async () => {
 })
 
 test('GET falls back to default response when injected resolver throws', async () => {
-  __setQuestionSyncResolverForTest(async () => {
+  setQuestionSyncResolverForTest(async () => {
     throw new Error('resolver failed')
   })
 

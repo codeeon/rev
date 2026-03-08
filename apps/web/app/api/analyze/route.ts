@@ -1,7 +1,7 @@
-import { streamText } from 'ai'
 import { NextResponse } from 'next/server'
 import { buildAnalysisPrompt } from '@/lib/ai/prompts'
 import { encodeAnalyzeMetaLine } from '@/lib/ai/stream-protocol'
+import { getAnalyzeTextStreamer } from './route-deps'
 import { analyzeSaju, parseAnalyzeInput } from '@workspace/saju-core'
 
 declare global {
@@ -16,22 +16,6 @@ const RATE_LIMIT_IP_HEADER_MAX_LENGTH = 256
 interface RateLimitEntry {
   count: number
   resetAt: number
-}
-
-type AnalyzeTextStreamer = (prompt: string) => AsyncIterable<string>
-
-const defaultAnalyzeTextStreamer: AnalyzeTextStreamer = (prompt: string) =>
-  streamText({
-    model: 'google/gemini-2.0-flash',
-    prompt,
-    maxOutputTokens: 2000,
-    temperature: 0.7,
-  }).textStream
-
-let analyzeTextStreamer: AnalyzeTextStreamer = defaultAnalyzeTextStreamer
-
-export function __setAnalyzeTextStreamerForTest(streamer: AnalyzeTextStreamer | null): void {
-  analyzeTextStreamer = streamer ?? defaultAnalyzeTextStreamer
 }
 
 const rateLimitStore = globalThis.__analyzeRateLimitStore ?? new Map<string, RateLimitEntry>()
@@ -165,7 +149,7 @@ export async function POST(req: Request) {
 
         let textStream: AsyncIterable<string>
         try {
-          textStream = analyzeTextStreamer(prompt)
+          textStream = getAnalyzeTextStreamer()(prompt)
         } catch {
           controller.close()
           return

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { POST, __setFeedbackResultSaverForTest } from './route'
+import { setFeedbackResultSaverForTest } from './route-deps'
+import { POST } from './route'
 
 function createValidPayload() {
   return {
@@ -46,7 +47,7 @@ function requestWithBody(
 }
 
 test.afterEach(() => {
-  __setFeedbackResultSaverForTest(null)
+  setFeedbackResultSaverForTest(null)
 })
 
 test('POST returns 415 for unsupported content type', async () => {
@@ -68,7 +69,7 @@ test('POST returns 400 for invalid feedback payload shape', async () => {
 })
 
 test('POST returns 200 when save succeeds', async () => {
-  __setFeedbackResultSaverForTest(async () => ({ saved: true }))
+  setFeedbackResultSaverForTest(async () => ({ saved: true }))
 
   const response = await POST(requestWithBody(JSON.stringify(createValidPayload())))
   assert.equal(response.status, 200)
@@ -76,7 +77,7 @@ test('POST returns 200 when save succeeds', async () => {
 })
 
 test('POST returns 202 when save is skipped', async () => {
-  __setFeedbackResultSaverForTest(async () => ({ saved: false, reason: 'not-configured' }))
+  setFeedbackResultSaverForTest(async () => ({ saved: false, reason: 'not-configured' }))
 
   const response = await POST(requestWithBody(JSON.stringify(createValidPayload())))
   assert.equal(response.status, 202)

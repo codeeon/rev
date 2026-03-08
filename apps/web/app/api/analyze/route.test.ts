@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { parseAnalyzeMetaLine } from '@/lib/ai/stream-protocol'
-import { POST, __setAnalyzeTextStreamerForTest } from './route'
+import { setAnalyzeTextStreamerForTest } from './route-deps'
+import { POST } from './route'
 
 declare global {
   var __analyzeRateLimitStore: Map<string, { count: number; resetAt: number }> | undefined
@@ -25,7 +26,7 @@ function createValidRequestBody() {
 }
 
 test.afterEach(() => {
-  __setAnalyzeTextStreamerForTest(null)
+  setAnalyzeTextStreamerForTest(null)
 })
 
 function requestWithBody(
@@ -107,7 +108,7 @@ test('POST normalizes invalid client IP headers into unknown bucket', async () =
 test('POST returns success stream with metadata header and text body contract', async () => {
   clearRateLimitStore()
 
-  __setAnalyzeTextStreamerForTest(async function* () {
+  setAnalyzeTextStreamerForTest(async function* () {
     yield '### 기본 성격 및 성향\n테스트 본문입니다.\n'
     yield '### 재물운 및 직업운\n테스트 본문입니다.\n'
   })
@@ -132,7 +133,7 @@ test('POST returns success stream with metadata header and text body contract', 
 test('POST still returns authoritative metadata when streamer throws synchronously', async () => {
   clearRateLimitStore()
 
-  __setAnalyzeTextStreamerForTest(() => {
+  setAnalyzeTextStreamerForTest(() => {
     throw new Error('stream bootstrap failed')
   })
 
