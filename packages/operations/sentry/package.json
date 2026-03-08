@@ -1,0 +1,27 @@
+{
+  "name": "@workspace/sentry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rm -rf dist && tsup src/index.ts src/browser.ts src/server.ts src/edge.ts src/types.ts --format esm --dts --out-dir dist --tsconfig tsconfig.build.json",
+    "clean": "rm -rf dist"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./browser": "./dist/browser.js",
+    "./server": "./dist/server.js",
+    "./edge": "./dist/edge.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@workspace/observability-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:tooling",
+    "tsup": "catalog:tooling",
+    "typescript": "catalog:tooling"
+  }
+}

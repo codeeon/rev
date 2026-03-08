@@ -25,6 +25,18 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@workspace/observability-core": [
+        "../../packages/operations/observability-core/src/index.ts"
+      ],
+      "@workspace/ga": [
+        "../../packages/operations/ga/src/index.ts"
+      ],
+      "@workspace/sentry": [
+        "../../packages/operations/sentry/src/index.ts"
+      ],
+      "@workspace/sentry/*": [
+        "../../packages/operations/sentry/src/*"
       ]
     }
   },

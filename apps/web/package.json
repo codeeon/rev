@@ -4,19 +4,22 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "pnpm dlx tsx --test app/api/analyze/route.test.ts app/api/operations/questions/route.test.ts app/api/feedback/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts",
+    "test": "tsx --test app/api/analyze/route.test.ts app/api/operations/questions/route.test.ts app/api/feedback/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts",
     "test:engine": "pnpm --filter @workspace/time-inference test"
   },
   "dependencies": {
     "@workspace/base-ui": "workspace:*",
+    "@workspace/ga": "workspace:*",
     "@workspace/google-sheets": "workspace:*",
     "@workspace/saju-core": "workspace:*",
+    "@workspace/sentry": "workspace:*",
     "@workspace/spreadsheet-admin": "workspace:*",
     "@workspace/time-inference": "workspace:*",
+    "@sentry/nextjs": "^8.41.0",
     "@vercel/analytics": "catalog:",
     "ai": "catalog:",
     "clsx": "catalog:",
@@ -37,6 +40,7 @@
     "@types/react-dom": "catalog:react19",
     "postcss": "catalog:tooling",
     "tailwindcss": "catalog:tooling",
+    "tsx": "catalog:tooling",
     "tw-animate-css": "catalog:tooling",
     "typescript": "catalog:tooling",
     "typescript-eslint": "catalog:tooling"
