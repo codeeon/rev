@@ -20,6 +20,8 @@
 
 - `packages/operations/sentry/src/types.ts`
 
+브라우저 replay를 사용할 경우 client init에서 replay integration이 추가되는지도 확인한다.
+
 ## 3. 환경 변수 설정
 
 `apps/web/.env.local` 또는 배포 환경 변수에 아래 값을 설정한다.
@@ -75,6 +77,7 @@ throw new Error('sentry-client-test')
 - 실제 스테이징 도메인에서 클라이언트 에러 1건 유입 확인
 - API 경로 서버 에러 1건 유입 확인
 - 샘플링 값이 의도와 일치하는지 확인
+- replay sample 값이 0보다 크면 replay가 실제 생성되는지 확인
 - 소스맵 업로드/스택트레이스 가독성 확인
 
 ## 6. 운영 배포 전 점검

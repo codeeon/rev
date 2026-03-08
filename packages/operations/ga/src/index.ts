@@ -42,14 +42,14 @@ export function buildGaScriptTags(measurementId: string): { src: string; initScr
 
 export function trackPageView(pageView: GaPageView): void {
   const win = getWindow()
-  if (!win?.gtag) return
+  if (!win) return
 
-  win.gtag('event', 'page_view', pageView)
+  invokeGtag(win, 'event', 'page_view', pageView)
 }
 
 export function trackEvent(event: GaEvent): void {
   const win = getWindow()
-  if (!win?.gtag) return
+  if (!win) return
 
   const payload = {
     event_category: event.category,
@@ -58,7 +58,7 @@ export function trackEvent(event: GaEvent): void {
     ...event,
   }
 
-  win.gtag('event', event.action, payload)
+  invokeGtag(win, 'event', event.action, payload)
 }
 
 export function createGaMeta(service: string, env: PublicRuntimeEnv = process.env): Record<string, string> {
@@ -68,4 +68,14 @@ export function createGaMeta(service: string, env: PublicRuntimeEnv = process.en
     environment: context.environment,
     release: context.release ?? 'unknown',
   }
+}
+
+function invokeGtag(win: WindowWithGtag, ...args: unknown[]): void {
+  if (win.gtag) {
+    win.gtag(...args)
+    return
+  }
+
+  win.dataLayer = win.dataLayer ?? []
+  win.dataLayer.push(args)
 }

@@ -14,7 +14,7 @@ export function GaScript() {
   return (
     <>
       <Script src={src} strategy="afterInteractive" />
-      <Script id="ga-init" strategy="afterInteractive">
+      <Script id="ga-init" strategy="beforeInteractive">
         {initScript}
       </Script>
     </>
