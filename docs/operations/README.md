@@ -4,6 +4,7 @@
 
 ## 구성
 
+- `env-registration-guide.md`
 - `integration/`
   - `spreadsheet-admin-integration-principles.md`
   - `google-sheets-package-architecture.md`
