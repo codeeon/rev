@@ -348,7 +348,7 @@ flowchart TB
         feedbackApi["/api/feedback"]
         prompt["Prompt Builder"]
         protocol["Stream Protocol<br/>__SAJU_META__ + text chunks"]
-        opsAdapter["spreadsheet adapter<br/>apps/web/lib/operations/spreadsheet.ts"]
+        adminServer["spreadsheet admin facade<br/>@workspace/spreadsheet-admin/server"]
     end
 
     subgraph workspace["Container: Workspace Packages"]
@@ -379,9 +379,9 @@ flowchart TB
 
     pages -->|GET /api/operations/questions| questionsApi
     pages -->|POST /api/feedback| feedbackApi
-    questionsApi --> opsAdapter
-    feedbackApi --> opsAdapter
-    opsAdapter --> admin
+    questionsApi --> adminServer
+    feedbackApi --> adminServer
+    adminServer --> admin
     admin --> gs
     admin --> inference
     gs --> sheets

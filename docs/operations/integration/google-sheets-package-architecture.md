@@ -53,7 +53,7 @@ packages/
 
 ### 3.3 의존성 방향
 
-- `apps/web` -> `@workspace/spreadsheet-admin` / `@workspace/google-sheets`
+- `apps/web` -> `@workspace/spreadsheet-admin/server`
 - `@workspace/spreadsheet-admin` -> `@workspace/google-sheets`, `@workspace/time-inference`
 - `@workspace/domain/*` -> (operations 패키지 의존 금지)
 
@@ -76,7 +76,7 @@ packages/operations/google-sheets/
     errors.ts
     index.ts
     server.ts
-    server-only.ts
+    assert-server-runtime.ts
     browser.ts
 
 packages/operations/spreadsheet-admin/
@@ -91,9 +91,11 @@ packages/operations/spreadsheet-admin/
     sync/
       last-known-good.ts
       sync-from-sheet.ts
+    runtime/
+      service.ts
     index.ts
     server.ts
-    server-only.ts
+    assert-server-runtime.ts
     browser.ts
 ```
 
@@ -112,6 +114,8 @@ packages/operations/spreadsheet-admin/
 - `normalizeAdminSheetRows(rows)`
 - `syncQuestionSetWithFallback({ loadLatest, store })`
 - `appendAnalysisResult(options)`
+- `syncQuestionsFromSpreadsheet(env, deps?)`
+- `saveAnalysisResultToSpreadsheet(record, env, deps?)`
 
 ## 6) 런타임 데이터 흐름
 
