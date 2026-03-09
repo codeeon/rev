@@ -9,6 +9,7 @@
   - `spreadsheet-admin-integration-principles.md`
   - `google-sheets-package-architecture.md`
   - `google-sheets-usage-guide.md`
+  - `google-sheets-sheet-bootstrap.md`
 - `observability/`
   - `README.md`
   - `ga.md`

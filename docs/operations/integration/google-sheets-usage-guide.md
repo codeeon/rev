@@ -11,6 +11,7 @@
 
 - `docs/operations/integration/google-sheets-package-architecture.md`
 - `docs/operations/integration/spreadsheet-admin-integration-principles.md`
+- `docs/operations/integration/google-sheets-sheet-bootstrap.md`
 
 ## 2) 패키지/앱 책임 요약
 
@@ -94,6 +95,16 @@
 - `scoreMapJson`의 허용되지 않은 시진 키
 - role 누락(`noise_reduction|core|fine_tune|closing`)
 
+현재 엔진 질문 원본을 시트 포맷으로 바로 내보내려면 아래 명령을 사용한다.
+
+```bash
+pnpm run export:questions-sheet --output /tmp/rev-questions.tsv
+```
+
+- 생성된 TSV 파일을 열어 전체 복사 후 `Questions` 시트 A1에 붙여 넣는다.
+- 첫 줄 헤더(`version`부터 `updatedAt`까지)도 함께 포함된다.
+- `updatedAt`을 고정하려면 `--updated-at 2026-03-10T00:00:00.000Z`처럼 명시한다.
+
 ### 6.2 Results 시트
 
 기본 range: `Results!A:J`
@@ -110,6 +121,15 @@
 - `inferenceResultJson`
 - `monitoringJson`
 - `feedbackJson`
+
+초기 헤더만 빠르게 만들려면 아래 명령을 사용한다.
+
+```bash
+pnpm run export:results-sheet --output /tmp/rev-results.tsv
+```
+
+- 생성된 TSV 파일을 열어 전체 복사 후 `Results` 시트 A1에 붙여 넣는다.
+- 현재 출력은 헤더 한 줄만 포함한다.
 
 ## 7) 런타임 동작 요약
 

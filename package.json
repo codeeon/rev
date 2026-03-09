@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "pnpm turbo run build --filter=web... && pnpm --filter web dev",
     "check:engine-sot": "node scripts/check-engine-sot.mjs",
+    "export:questions-sheet": "node scripts/export-admin-questions.mjs",
+    "export:results-sheet": "node scripts/export-results-template.mjs",
     "build:data": "pnpm --filter @workspace/engine-data build",
     "build:saju-core": "pnpm --filter @workspace/saju-core build",
     "build:time-inference": "pnpm --filter @workspace/time-inference build",

@@ -24,6 +24,7 @@ dist/
 .omc/
 .tmp-test/
 **/.tmp-test/
+/tmp/
 .pnpm-store/
 .claude/
 packages/design-systems/base-ui/dist/
