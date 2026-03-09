@@ -3,6 +3,42 @@
 이 문서는 `rev-workspace`의 현재 코드 기준 아키텍처를 설명한다.
 대상은 신규 기여자, 운영 담당자, 도메인 로직/운영 연동 변경 작업자다.
 
+빠르게 읽으려면 아래 문서부터 본다.
+
+- `docs/package-architecture-summary.md`: 현재 패키지 구조와 책임 요약
+- `docs/operations/integration/google-sheets-package-architecture.md`: Sheets 연동 상세 설계
+- `docs/operations/observability/README.md`: GA/Sentry 운영 문서 인덱스
+
+## 0. 빠른 읽기
+
+현재 워크스페이스의 핵심 구조는 아래처럼 보면 된다.
+
+```text
+apps/web
+├─ UI/페이지/라우트/API
+├─ @workspace/base-ui
+├─ @workspace/saju-core
+├─ @workspace/time-inference
+├─ @workspace/spreadsheet-admin/server
+├─ @workspace/ga
+└─ @workspace/sentry
+
+@workspace/time-inference
+├─ @workspace/engine-data
+└─ @workspace/saju-core
+
+@workspace/spreadsheet-admin
+├─ @workspace/google-sheets
+└─ @workspace/time-inference
+```
+
+현재 구조에서 기억할 규칙은 네 가지다.
+
+- `apps/web`은 workspace 패키지를 `exports` 기준으로만 소비한다.
+- domain 패키지는 operations 패키지를 의존하지 않는다.
+- Google Sheets 저수준 transport는 `@workspace/google-sheets`, 앱용 유스케이스는 `@workspace/spreadsheet-admin`이 맡는다.
+- observability 공통 helper는 별도 코어 패키지 없이 `@workspace/ga`, `@workspace/sentry` 내부에 둔다.
+
 ## 1. 시스템 개요
 
 본 프로젝트는 사주 분석 웹 애플리케이션이며, 핵심 기능은 아래 세 축으로 구성된다.
