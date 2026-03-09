@@ -6,7 +6,8 @@
   "scripts": {
     "check:sot": "node ../../../scripts/check-engine-sot.mjs",
     "build": "pnpm run check:sot && rm -rf dist && tsup src/index.ts --format esm --dts --out-dir dist --tsconfig tsconfig.build.json && mkdir -p dist/data && cp src/data/engine.json dist/data/",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --project tsconfig.json"
   },
   "exports": {
     ".": "./dist/index.js",

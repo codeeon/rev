@@ -12,8 +12,8 @@
       "dependsOn": ["build", "^build"],
       "outputs": []
     },
-    "test:engine": {
-      "dependsOn": ["build"],
+    "test": {
+      "dependsOn": ["build", "^build"],
       "outputs": []
     }
   }

@@ -10,11 +10,12 @@
     "build:saju-core": "pnpm --filter @workspace/saju-core build",
     "build:time-inference": "pnpm --filter @workspace/time-inference build",
     "build:ui": "pnpm --filter @workspace/base-ui build",
-    "build": "pnpm turbo run build --filter=web...",
-    "lint": "pnpm turbo run lint --filter=web",
-    "typecheck": "pnpm turbo run typecheck --filter=web",
-    "test:engine": "pnpm turbo run test:engine --filter=web",
-    "ci:monorepo": "pnpm run check:engine-sot && pnpm turbo run lint typecheck test:engine build --filter=web..."
+    "build": "pnpm turbo run build",
+    "lint": "pnpm turbo run lint",
+    "typecheck": "pnpm turbo run typecheck",
+    "test": "pnpm turbo run test",
+    "test:engine": "pnpm --filter @workspace/time-inference test",
+    "ci:monorepo": "pnpm run check:engine-sot && pnpm turbo run lint typecheck test build"
   },
   "devDependencies": {
     "turbo": "catalog:tooling"

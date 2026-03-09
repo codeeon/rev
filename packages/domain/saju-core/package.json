@@ -6,7 +6,8 @@
   "scripts": {
     "build": "rm -rf dist && tsup src/index.ts --format esm --dts --out-dir dist --tsconfig tsconfig.build.json",
     "clean": "rm -rf dist",
-    "test": "tsx src/validation.spec.ts"
+    "test": "tsx src/validation.spec.ts",
+    "typecheck": "tsc --project tsconfig.json"
   },
   "exports": {
     ".": "./dist/index.js"

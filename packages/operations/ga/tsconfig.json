@@ -1,16 +1,7 @@
 {
+  "extends": "../../../tsconfig.package.base.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "declaration": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "types": ["node"],
-    "skipLibCheck": true,
-    "noEmit": true,
-    "incremental": true
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
