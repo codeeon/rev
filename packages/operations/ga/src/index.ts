@@ -1,4 +1,4 @@
-import { requirePublicEnv, resolveObservabilityContext, type PublicRuntimeEnv } from '@workspace/observability-core'
+import { requirePublicEnv, resolveObservabilityContext, type PublicRuntimeEnv } from './runtime-env'
 
 export interface GaPageView {
   page_path: string

@@ -1,4 +1,4 @@
-import { resolveObservabilityContext, type PublicRuntimeEnv } from '@workspace/observability-core'
+import { resolveObservabilityContext, type PublicRuntimeEnv } from './runtime-env'
 
 export interface SentryBaseConfig {
   dsn?: string

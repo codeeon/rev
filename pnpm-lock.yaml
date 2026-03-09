@@ -499,10 +499,6 @@ importers:
         version: 5.7.3
 
   packages/operations/ga:
-    dependencies:
-      '@workspace/observability-core':
-        specifier: workspace:*
-        version: link:../observability-core
     devDependencies:
       '@types/node':
         specifier: catalog:tooling
@@ -529,23 +525,7 @@ importers:
         specifier: catalog:tooling
         version: 5.7.3
 
-  packages/operations/observability-core:
-    devDependencies:
-      '@types/node':
-        specifier: catalog:tooling
-        version: 22.19.11
-      tsup:
-        specifier: catalog:tooling
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.7.3)
-      typescript:
-        specifier: catalog:tooling
-        version: 5.7.3
-
   packages/operations/sentry:
-    dependencies:
-      '@workspace/observability-core':
-        specifier: workspace:*
-        version: link:../observability-core
     devDependencies:
       '@types/node':
         specifier: catalog:tooling

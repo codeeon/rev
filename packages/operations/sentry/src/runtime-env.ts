@@ -5,7 +5,6 @@ export interface ObservabilityContext {
 }
 
 export type PublicRuntimeEnv = Record<string, string | undefined> & {
-  NEXT_PUBLIC_GA_MEASUREMENT_ID?: string
   NEXT_PUBLIC_SENTRY_DSN?: string
   NEXT_PUBLIC_APP_ENV?: string
   NEXT_PUBLIC_APP_RELEASE?: string
@@ -29,12 +28,4 @@ export function resolveObservabilityContext(service: string, env: PublicRuntimeE
     environment: normalizeEnvironment(env.NEXT_PUBLIC_APP_ENV),
     release: readNonEmpty(env.NEXT_PUBLIC_APP_RELEASE),
   }
-}
-
-export function requirePublicEnv(key: keyof PublicRuntimeEnv, env: PublicRuntimeEnv): string {
-  const value = readNonEmpty(env[key])
-  if (!value) {
-    throw new Error(`Missing required public observability env: ${key}`)
-  }
-  return value
 }

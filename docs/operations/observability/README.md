@@ -11,7 +11,6 @@
 
 ## 패키지 구조
 
-- `@workspace/observability-core`: 공통 환경/컨텍스트 해석
 - `@workspace/ga`: GA 측정 ID 해석, 스크립트/이벤트 helper
 - `@workspace/sentry`: 브라우저/서버/엣지용 설정 객체 빌더
 
@@ -27,6 +26,6 @@
 ## 빠른 시작
 
 1. `apps/web/.env.local`에 GA/Sentry 환경변수 입력
-2. `pnpm -s build --filter=@workspace/observability-core --filter=@workspace/ga --filter=@workspace/sentry`
+2. `pnpm -s build --filter=@workspace/ga --filter=@workspace/sentry`
 3. `pnpm dev` 실행 후 브라우저 네트워크/콘솔에서 이벤트 전송 확인
 4. Sentry SDK를 실제로 활성화할 경우 `sentry.md`의 rollout 절차대로 단계 적용
