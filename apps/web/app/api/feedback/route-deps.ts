@@ -1,5 +1,5 @@
 import type { AnalysisResultRecord } from '@workspace/spreadsheet-admin/server'
-import { saveAnalysisResultToSpreadsheet, type SaveResultResponse } from '@/lib/operations/spreadsheet'
+import { saveAnalysisResultToSpreadsheet, type SaveResultResponse } from '@workspace/spreadsheet-admin/server'
 
 type FeedbackResultSaver = (record: AnalysisResultRecord) => Promise<SaveResultResponse>
 

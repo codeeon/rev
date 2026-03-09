@@ -1,4 +1,4 @@
-import { syncQuestionsFromSpreadsheet, type QuestionSyncResponse } from '@/lib/operations/spreadsheet'
+import { syncQuestionsFromSpreadsheet, type QuestionSyncResponse } from '@workspace/spreadsheet-admin/server'
 
 type QuestionSyncResolver = () => Promise<QuestionSyncResponse>
 

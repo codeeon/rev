@@ -1,3 +1,3 @@
-import './server-only'
+import './assert-server-runtime'
 
 export * from './index'

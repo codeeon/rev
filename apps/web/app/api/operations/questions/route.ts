@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { syncQuestionsFromSpreadsheet } from '@/lib/operations/spreadsheet'
+import { syncQuestionsFromSpreadsheet } from '@workspace/spreadsheet-admin/server'
 import { getQuestionSyncResolver } from './route-deps'
 
 export async function GET() {

@@ -14,7 +14,6 @@
   "dependencies": {
     "@workspace/base-ui": "workspace:*",
     "@workspace/ga": "workspace:*",
-    "@workspace/google-sheets": "workspace:*",
     "@workspace/saju-core": "workspace:*",
     "@workspace/sentry": "workspace:*",
     "@workspace/spreadsheet-admin": "workspace:*",
@@ -29,7 +28,6 @@
     "next-themes": "catalog:",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
-    "server-only": "workspace:*",
     "tailwind-merge": "catalog:"
   },
   "devDependencies": {

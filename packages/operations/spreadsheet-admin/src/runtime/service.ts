@@ -1,23 +1,19 @@
-import 'server-only'
-
 import {
   createServiceAccountTokenProvider,
   createSheetsClient,
   loadServiceAccountCredentialsFromEnv,
   type GoogleSheetsClient,
 } from '@workspace/google-sheets/server'
-import {
-  InMemoryLastKnownGoodStore,
-  appendAnalysisResult,
-  loadQuestionSetFromSheet,
-  syncQuestionSetWithFallback,
-  type AnalysisResultRecord,
-  type NormalizedQuestionSet,
-} from '@workspace/spreadsheet-admin/server'
 import { ENGINE_QUESTIONS, ENGINE_SETTINGS, type EngineQuestion } from '@workspace/time-inference'
+import { loadQuestionSetFromSheet } from '../question-source/load-question-set'
+import type { NormalizedQuestionSet } from '../question-source/normalize'
+import { appendAnalysisResult } from '../result-sink/append-result'
+import type { AnalysisResultRecord } from '../result-sink/result-schema'
+import { InMemoryLastKnownGoodStore, type LastKnownGoodStore } from '../sync/last-known-good'
+import { syncQuestionSetWithFallback } from '../sync/sync-from-sheet'
 
 declare global {
-  var __spreadsheetQuestionSetStore: InMemoryLastKnownGoodStore | undefined
+  var __spreadsheetAdminQuestionSetStore: InMemoryLastKnownGoodStore | undefined
 }
 
 const DEFAULT_QUESTIONS_RANGE = 'Questions!A:K'
@@ -41,8 +37,13 @@ export interface SaveResultResponse {
   reason?: 'not-configured' | 'save-failed'
 }
 
-const questionSetStore = globalThis.__spreadsheetQuestionSetStore ?? new InMemoryLastKnownGoodStore()
-globalThis.__spreadsheetQuestionSetStore = questionSetStore
+export interface SpreadsheetAdminRuntimeDeps {
+  createClient?: (env: NodeJS.ProcessEnv) => GoogleSheetsClient
+  store?: LastKnownGoodStore
+}
+
+const defaultQuestionSetStore = globalThis.__spreadsheetAdminQuestionSetStore ?? new InMemoryLastKnownGoodStore()
+globalThis.__spreadsheetAdminQuestionSetStore = defaultQuestionSetStore
 
 function readEnvValue(env: NodeJS.ProcessEnv, key: string): string | null {
   const value = env[key]?.trim()
@@ -50,10 +51,10 @@ function readEnvValue(env: NodeJS.ProcessEnv, key: string): string | null {
 }
 
 function isServiceAccountConfigured(env: NodeJS.ProcessEnv): boolean {
-  return !!readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_EMAIL') && !!readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY')
+  return Boolean(readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_EMAIL') && readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY'))
 }
 
-function getSpreadsheetAdminConfig(env: NodeJS.ProcessEnv = process.env): SpreadsheetAdminConfig | null {
+function getSpreadsheetAdminConfig(env: NodeJS.ProcessEnv): SpreadsheetAdminConfig | null {
   const spreadsheetId = readEnvValue(env, 'GOOGLE_SPREADSHEET_ADMIN_ID')
   if (!spreadsheetId) {
     return null
@@ -66,13 +67,13 @@ function getSpreadsheetAdminConfig(env: NodeJS.ProcessEnv = process.env): Spread
   }
 }
 
-function createGoogleSheetsClientFromEnv(env: NodeJS.ProcessEnv = process.env): GoogleSheetsClient {
+function createGoogleSheetsClientFromEnv(env: NodeJS.ProcessEnv): GoogleSheetsClient {
   const credentials = loadServiceAccountCredentialsFromEnv(env)
   const tokenProvider = createServiceAccountTokenProvider({ credentials })
 
   return createSheetsClient({
     tokenProvider,
-    userAgent: 'rev-workspace/web-spreadsheet-admin',
+    userAgent: 'rev-workspace/spreadsheet-admin',
   })
 }
 
@@ -93,16 +94,27 @@ function toQuestionResponse(questionSet: NormalizedQuestionSet, source: 'latest'
   }
 }
 
-export async function syncQuestionsFromSpreadsheet(env: NodeJS.ProcessEnv = process.env): Promise<QuestionSyncResponse> {
+function getClient(env: NodeJS.ProcessEnv, deps: SpreadsheetAdminRuntimeDeps): GoogleSheetsClient {
+  return deps.createClient ? deps.createClient(env) : createGoogleSheetsClientFromEnv(env)
+}
+
+function getStore(deps: SpreadsheetAdminRuntimeDeps): LastKnownGoodStore {
+  return deps.store ?? defaultQuestionSetStore
+}
+
+export async function syncQuestionsFromSpreadsheet(
+  env: NodeJS.ProcessEnv = process.env,
+  deps: SpreadsheetAdminRuntimeDeps = {},
+): Promise<QuestionSyncResponse> {
   const config = getSpreadsheetAdminConfig(env)
   if (!config || !isServiceAccountConfigured(env)) {
     return toDefaultQuestionResponse()
   }
 
   try {
-    const client = createGoogleSheetsClientFromEnv(env)
+    const client = getClient(env, deps)
     const synced = await syncQuestionSetWithFallback({
-      store: questionSetStore,
+      store: getStore(deps),
       loadLatest: async () =>
         loadQuestionSetFromSheet({
           client,
@@ -120,6 +132,7 @@ export async function syncQuestionsFromSpreadsheet(env: NodeJS.ProcessEnv = proc
 export async function saveAnalysisResultToSpreadsheet(
   record: AnalysisResultRecord,
   env: NodeJS.ProcessEnv = process.env,
+  deps: SpreadsheetAdminRuntimeDeps = {},
 ): Promise<SaveResultResponse> {
   const config = getSpreadsheetAdminConfig(env)
   if (!config || !isServiceAccountConfigured(env)) {
@@ -127,13 +140,14 @@ export async function saveAnalysisResultToSpreadsheet(
   }
 
   try {
-    const client = createGoogleSheetsClientFromEnv(env)
+    const client = getClient(env, deps)
     await appendAnalysisResult({
       client,
       spreadsheetId: config.spreadsheetId,
       range: config.resultsRange,
       record,
     })
+
     return { saved: true }
   } catch {
     return { saved: false, reason: 'save-failed' }
