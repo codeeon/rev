@@ -1,15 +1,29 @@
 'use client'
 
 import Script from 'next/script'
-import { buildGaScriptTags, getGaMeasurementId } from '@workspace/ga'
+import { buildGaScriptTags } from '@workspace/ga'
 
-export function GaScript() {
-  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim()
+export interface GaScriptTags {
+  src: string
+  initScript: string
+}
+
+export function resolveGaScriptTags(env: NodeJS.ProcessEnv = process.env): GaScriptTags | null {
+  const measurementId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim()
   if (!measurementId) {
     return null
   }
 
-  const { src, initScript } = buildGaScriptTags(getGaMeasurementId(process.env))
+  return buildGaScriptTags(measurementId)
+}
+
+export function GaScript() {
+  const tags = resolveGaScriptTags()
+  if (!tags) {
+    return null
+  }
+
+  const { src, initScript } = tags
 
   return (
     <>
