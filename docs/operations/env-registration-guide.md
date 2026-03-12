@@ -30,8 +30,9 @@ cp apps/web/.env.example apps/web/.env.local
 그 다음 아래 순서로 값을 채운다.
 
 1. AI 분석용 키 등록
-2. GA/Sentry 공개 런타임 값 등록
-3. Google Sheets 연동을 쓸 경우 스프레드시트 ID와 서비스 계정 값 등록
+2. admin 인증(Auth.js) 값 등록
+3. GA/Sentry 공개 런타임 값 등록
+4. Google Sheets 연동을 쓸 경우 스프레드시트 ID와 서비스 계정 값 등록
 
 ## 변수별 등록 기준
 
@@ -47,7 +48,28 @@ cp apps/web/.env.example apps/web/.env.local
 - `AI_GATEWAY_API_KEY`가 비어 있으면 `/api/analyze` 경로의 실제 AI 호출이 정상 동작하지 않는다.
 - `VERCEL_OIDC_TOKEN`은 `.env.example`에 주석으로만 남아 있는 선택값이다. 로컬 개발에서는 대개 비워 둔다.
 
-### 2. GA / Sentry 공개 런타임 값
+### 2. Admin 인증(Auth.js)
+
+| 변수명 | 필수 여부 | 등록 위치 | 값 설명 |
+| --- | --- | --- | --- |
+| `AUTH_SECRET` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | Auth.js JWT 세션 서명용 비밀값 |
+| `AUTH_GOOGLE_ID` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | Google OAuth client secret |
+| `ADMIN_ALLOWED_EMAILS` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | admin 접근을 허용할 이메일 목록, 쉼표 구분 |
+
+예시:
+
+```env
+ADMIN_ALLOWED_EMAILS=owner@example.com,ops@example.com
+```
+
+메모:
+
+- `AUTH_SECRET`가 비어 있으면 Auth.js 세션이 안정적으로 동작하지 않는다.
+- `ADMIN_ALLOWED_EMAILS`는 서버에서만 읽는 allowlist다.
+- 이메일은 `trim + lowercase` 기준으로 비교한다.
+
+### 3. GA / Sentry 공개 런타임 값
 
 | 변수명 | 필수 여부 | 등록 위치 | 권장값 / 준비 방법 |
 | --- | --- | --- | --- |
@@ -66,7 +88,7 @@ cp apps/web/.env.example apps/web/.env.local
 - Sentry를 아직 켜지 않았다면 `NEXT_PUBLIC_SENTRY_DSN`도 비워 둘 수 있다.
 - 샘플링 값은 반드시 숫자로 넣는다. 예: `0.2`, `1`, `0.01`
 
-### 3. Google Sheets 연동
+### 4. Google Sheets 연동
 
 | 변수명 | 필수 여부 | 등록 위치 | 값 설명 |
 | --- | --- | --- | --- |
@@ -87,7 +109,7 @@ https://docs.google.com/spreadsheets/d/<이 부분이 스프레드시트 ID>/edi
 - 질문 동기화와 결과 저장을 둘 다 쓰면 동일한 스프레드시트 ID를 사용한다.
 - range를 바꾸지 않는다면 `.env.example` 기본값을 그대로 유지하면 된다.
 
-### 4. Google 서비스 계정 인증
+### 5. Google 서비스 계정 인증
 
 | 변수명 | 필수 여부 | 등록 위치 | 준비 방법 |
 | --- | --- | --- | --- |
@@ -129,8 +151,9 @@ GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nABCDEF...\n-----
 
 1. `apps/web/.env.example`를 `apps/web/.env.local`로 복사한다.
 2. 최소값으로 `AI_GATEWAY_API_KEY`를 먼저 채운다.
-3. GA/Sentry를 쓸 계획이면 해당 공개 런타임 값을 추가한다.
-4. Google Sheets 연동이 필요하면 스프레드시트 ID와 서비스 계정 값을 추가한다.
+3. admin UI를 쓸 계획이면 Auth.js 값을 추가한다.
+4. GA/Sentry를 쓸 계획이면 해당 공개 런타임 값을 추가한다.
+5. Google Sheets 연동이 필요하면 스프레드시트 ID와 서비스 계정 값을 추가한다.
 5. 서비스 계정 이메일을 대상 스프레드시트에 공유한다.
 6. `pnpm dev`로 앱을 실행한다.
 
@@ -180,8 +203,15 @@ GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nABCDEF...\n-----
 
 ### Google Sheets
 
-- `/api/operations/questions`가 `engine-default`만 반환하지 않는지 확인
-- `/api/feedback` 결과가 `saved: true` 또는 의도한 fallback 응답으로 내려오는지 확인
+- `/api/operations/questions`가 `200`으로 질문 payload를 반환하는지 확인
+- `/api/operations/questions`가 실패하면 `503`과 오류 메시지를 반환하는지 확인
+- `/api/feedback` 결과가 `saved: true` 또는 실패 이유(`not-configured`, `save-failed`)를 반환하는지 확인
+
+### Admin Auth
+
+- `/admin/login`에서 Google 로그인 버튼이 보이는지 확인
+- allowlist에 없는 계정은 `/admin/login?error=AccessDenied`로 막히는지 확인
+- allowlist에 있는 계정만 `/admin/results`, `/admin/questions`에 접근 가능한지 확인
 
 ## 관련 문서
 

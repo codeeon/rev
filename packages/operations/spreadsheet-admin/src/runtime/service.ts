@@ -10,6 +10,12 @@ import { loadQuestionSetFromSheet } from '../question-source/load-question-set'
 import type { NormalizedQuestionSet } from '../question-source/normalize'
 import { appendAnalysisResult } from '../result-sink/append-result'
 import type { AnalysisResultRecord } from '../result-sink/result-schema'
+import {
+  getAnalysisResultBySessionId,
+  listAnalysisResults,
+  type ListAnalysisResultsResponse,
+  type StoredAnalysisResultRecord,
+} from '../result-source/read-results'
 import { InMemoryLastKnownGoodStore, type LastKnownGoodStore } from '../sync/last-known-good'
 import { syncQuestionSetWithFallback } from '../sync/sync-from-sheet'
 
@@ -55,6 +61,11 @@ export interface QuestionSyncResponse {
 export interface SaveResultResponse {
   saved: boolean
   reason?: 'not-configured' | 'save-failed'
+}
+
+export interface ListAdminResultsOptions {
+  limit?: number
+  sessionId?: string
 }
 
 export interface SpreadsheetAdminRuntimeDeps {
@@ -339,5 +350,108 @@ export async function saveAnalysisResultToSpreadsheet(
       ...getErrorDebugPayload(error),
     })
     return { saved: false, reason: 'save-failed' }
+  }
+}
+
+export async function listAdminResultsFromSpreadsheet(
+  options: ListAdminResultsOptions = {},
+  env: NodeJS.ProcessEnv = process.env,
+  deps: SpreadsheetAdminRuntimeDeps = {},
+): Promise<ListAnalysisResultsResponse> {
+  const config = getSpreadsheetAdminConfig(env)
+  const serviceAccountConfigured = isServiceAccountConfigured(env)
+  const envSummary = getEnvDebugSummary(env)
+
+  debugLog(env, 'result list env summary', {
+    ...envSummary,
+    limit: options.limit ?? null,
+    sessionId: options.sessionId ?? null,
+  })
+
+  if (!config || !serviceAccountConfigured) {
+    warnLog(env, 'result list aborted because spreadsheet env is incomplete', {
+      ...envSummary,
+      hasSpreadsheetConfig: Boolean(config),
+      serviceAccountConfigured,
+    })
+    throw new Error('spreadsheet-results-not-configured')
+  }
+
+  try {
+    const client = getClient(env, deps)
+    const payload = await listAnalysisResults({
+      client,
+      spreadsheetId: config.spreadsheetId,
+      range: config.resultsRange,
+      limit: options.limit,
+      sessionId: options.sessionId,
+    })
+
+    debugLog(env, 'result list completed', {
+      ...envSummary,
+      returnedCount: payload.items.length,
+      limit: payload.limit,
+      matchedSessionId: payload.matchedSessionId ?? null,
+    })
+
+    return payload
+  } catch (error) {
+    errorLog(env, 'result list failed', {
+      ...envSummary,
+      error: getErrorMessage(error),
+      ...getErrorDebugPayload(error),
+    })
+    throw error
+  }
+}
+
+export async function getAdminResultBySessionIdFromSpreadsheet(
+  sessionId: string,
+  env: NodeJS.ProcessEnv = process.env,
+  deps: SpreadsheetAdminRuntimeDeps = {},
+): Promise<StoredAnalysisResultRecord | null> {
+  const config = getSpreadsheetAdminConfig(env)
+  const serviceAccountConfigured = isServiceAccountConfigured(env)
+  const envSummary = getEnvDebugSummary(env)
+
+  debugLog(env, 'result detail env summary', {
+    ...envSummary,
+    sessionId,
+  })
+
+  if (!config || !serviceAccountConfigured) {
+    warnLog(env, 'result detail aborted because spreadsheet env is incomplete', {
+      ...envSummary,
+      sessionId,
+      hasSpreadsheetConfig: Boolean(config),
+      serviceAccountConfigured,
+    })
+    throw new Error('spreadsheet-results-not-configured')
+  }
+
+  try {
+    const client = getClient(env, deps)
+    const result = await getAnalysisResultBySessionId({
+      client,
+      spreadsheetId: config.spreadsheetId,
+      range: config.resultsRange,
+      sessionId,
+    })
+
+    debugLog(env, 'result detail completed', {
+      ...envSummary,
+      sessionId,
+      found: Boolean(result),
+    })
+
+    return result
+  } catch (error) {
+    errorLog(env, 'result detail failed', {
+      ...envSummary,
+      sessionId,
+      error: getErrorMessage(error),
+      ...getErrorDebugPayload(error),
+    })
+    throw error
   }
 }
