@@ -8,6 +8,7 @@
 - `docs/package-architecture-summary.md`: 현재 패키지 구조와 책임 요약
 - `docs/operations/integration/google-sheets-package-architecture.md`: Sheets 연동 상세 설계
 - `docs/operations/observability/README.md`: GA/Sentry 운영 문서 인덱스
+- `docs/admin/README.md`: Auth.js 기반 admin UI 도입 설계 문서
 
 ## 0. 빠른 읽기
 
