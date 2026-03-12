@@ -12,6 +12,7 @@
 
 - `authjs-admin-ui-adoption-design.md`
 - `authjs-admin-access-control-plan.md`
+- `authjs-admin-ui-authoring-guide.md`
 - `authjs-admin-ui-implementation-order.md`
 - `authjs-admin-ui-phase-1-checklist.md`
 
@@ -26,5 +27,6 @@
 
 1. 구조와 책임 분리가 궁금하면 `authjs-admin-ui-adoption-design.md`
 2. 접근 권한 제어만 따로 보면 `authjs-admin-access-control-plan.md`
-3. 실제 파일 작업 순서가 필요하면 `authjs-admin-ui-implementation-order.md`
-4. PR/작업 체크리스트가 필요하면 `authjs-admin-ui-phase-1-checklist.md`
+3. 실제 구현 규칙과 확장 기준은 `authjs-admin-ui-authoring-guide.md`
+4. 실제 파일 작업 순서가 필요하면 `authjs-admin-ui-implementation-order.md`
+5. PR/작업 체크리스트가 필요하면 `authjs-admin-ui-phase-1-checklist.md`
