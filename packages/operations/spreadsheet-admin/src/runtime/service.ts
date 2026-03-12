@@ -1,6 +1,7 @@
 import {
   createServiceAccountTokenProvider,
   createSheetsClient,
+  GoogleSheetsHttpError,
   loadServiceAccountCredentialsFromEnv,
   type GoogleSheetsClient,
 } from '@workspace/google-sheets/server'
@@ -23,6 +24,25 @@ interface SpreadsheetAdminConfig {
   spreadsheetId: string
   questionsRange: string
   resultsRange: string
+}
+
+interface SpreadsheetAdminEnvDebugSummary {
+  spreadsheetId: string | null
+  questionsRange: string | null
+  resultsRange: string | null
+  serviceAccountEmail: string | null
+  serviceAccountPrivateKeyPresent: boolean
+  serviceAccountPrivateKeyIdPresent: boolean
+  serviceAccountSubjectPresent: boolean
+  serviceAccountPrivateKeyDiagnostics: {
+    hasBeginMarker: boolean
+    hasEndMarker: boolean
+    actualNewlineCount: number
+    escapedNewlineCount: number
+    hasWrappingQuotes: boolean
+    startsWithBeginMarkerAfterTrim: boolean
+    endsWithEndMarkerAfterTrim: boolean
+  }
 }
 
 export interface QuestionSyncResponse {
@@ -48,6 +68,133 @@ globalThis.__spreadsheetAdminQuestionSetStore = defaultQuestionSetStore
 function readEnvValue(env: NodeJS.ProcessEnv, key: string): string | null {
   const value = env[key]?.trim()
   return value ? value : null
+}
+
+function shouldLogDebug(env: NodeJS.ProcessEnv): boolean {
+  return env.NODE_ENV === 'development' || env.DEBUG_SPREADSHEET_ADMIN === 'true'
+}
+
+function maskValue(value: string | null, visibleStart = 4, visibleEnd = 4): string | null {
+  if (!value) {
+    return null
+  }
+
+  if (value.length <= visibleStart + visibleEnd) {
+    return `${value.slice(0, 1)}***`
+  }
+
+  return `${value.slice(0, visibleStart)}...${value.slice(-visibleEnd)}`
+}
+
+function maskEmail(value: string | null): string | null {
+  if (!value) {
+    return null
+  }
+
+  const [localPart, domain] = value.split('@')
+  if (!domain) {
+    return maskValue(value, 2, 2)
+  }
+
+  const visibleLocal = localPart.length <= 2 ? `${localPart.slice(0, 1)}***` : `${localPart.slice(0, 2)}***`
+  return `${visibleLocal}@${domain}`
+}
+
+function countMatches(value: string, pattern: RegExp): number {
+  return [...value.matchAll(pattern)].length
+}
+
+function getPrivateKeyDiagnostics(rawValue: string | undefined): SpreadsheetAdminEnvDebugSummary['serviceAccountPrivateKeyDiagnostics'] {
+  const value = rawValue ?? ''
+  const trimmed = value.trim()
+
+  return {
+    hasBeginMarker: value.includes('-----BEGIN PRIVATE KEY-----'),
+    hasEndMarker: value.includes('-----END PRIVATE KEY-----'),
+    actualNewlineCount: countMatches(value, /\n/g),
+    escapedNewlineCount: countMatches(value, /\\n/g),
+    hasWrappingQuotes:
+      (trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'")),
+    startsWithBeginMarkerAfterTrim: trimmed.startsWith('-----BEGIN PRIVATE KEY-----'),
+    endsWithEndMarkerAfterTrim: trimmed.endsWith('-----END PRIVATE KEY-----') || trimmed.endsWith('-----END PRIVATE KEY-----\\n'),
+  }
+}
+
+function getEnvDebugSummary(env: NodeJS.ProcessEnv): SpreadsheetAdminEnvDebugSummary {
+  return {
+    spreadsheetId: maskValue(readEnvValue(env, 'GOOGLE_SPREADSHEET_ADMIN_ID')),
+    questionsRange: readEnvValue(env, 'GOOGLE_SPREADSHEET_QUESTIONS_RANGE') ?? DEFAULT_QUESTIONS_RANGE,
+    resultsRange: readEnvValue(env, 'GOOGLE_SPREADSHEET_RESULTS_RANGE') ?? DEFAULT_RESULTS_RANGE,
+    serviceAccountEmail: maskEmail(readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_EMAIL')),
+    serviceAccountPrivateKeyPresent: Boolean(readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY')),
+    serviceAccountPrivateKeyIdPresent: Boolean(readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID')),
+    serviceAccountSubjectPresent: Boolean(readEnvValue(env, 'GOOGLE_SERVICE_ACCOUNT_SUBJECT')),
+    serviceAccountPrivateKeyDiagnostics: getPrivateKeyDiagnostics(env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY),
+  }
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
+function getErrorDebugPayload(error: unknown): Record<string, unknown> {
+  if (error instanceof GoogleSheetsHttpError) {
+    return {
+      errorCode: error.code,
+      errorStatus: error.status,
+      errorDetails: error.details,
+    }
+  }
+
+  if (error instanceof Error) {
+    return {
+      errorCode: 'ERROR',
+      errorName: error.name,
+    }
+  }
+
+  return {
+    errorCode: 'UNKNOWN',
+  }
+}
+
+function debugLog(env: NodeJS.ProcessEnv, message: string, payload?: unknown): void {
+  if (!shouldLogDebug(env)) {
+    return
+  }
+
+  if (payload) {
+    console.info(`[spreadsheet-admin] ${message}`, payload)
+    return
+  }
+
+  console.info(`[spreadsheet-admin] ${message}`)
+}
+
+function warnLog(env: NodeJS.ProcessEnv, message: string, payload?: unknown): void {
+  if (!shouldLogDebug(env)) {
+    return
+  }
+
+  if (payload) {
+    console.warn(`[spreadsheet-admin] ${message}`, payload)
+    return
+  }
+
+  console.warn(`[spreadsheet-admin] ${message}`)
+}
+
+function errorLog(env: NodeJS.ProcessEnv, message: string, payload?: unknown): void {
+  if (!shouldLogDebug(env)) {
+    return
+  }
+
+  if (payload) {
+    console.error(`[spreadsheet-admin] ${message}`, payload)
+    return
+  }
+
+  console.error(`[spreadsheet-admin] ${message}`)
 }
 
 function isServiceAccountConfigured(env: NodeJS.ProcessEnv): boolean {
@@ -77,7 +224,6 @@ function createGoogleSheetsClientFromEnv(env: NodeJS.ProcessEnv): GoogleSheetsCl
   })
 }
 
-
 function toQuestionResponse(questionSet: NormalizedQuestionSet, source: 'latest' | 'last-known-good'): QuestionSyncResponse {
   return {
     source: source === 'latest' ? 'spreadsheet-latest' : 'spreadsheet-fallback',
@@ -99,7 +245,17 @@ export async function syncQuestionsFromSpreadsheet(
   deps: SpreadsheetAdminRuntimeDeps = {},
 ): Promise<QuestionSyncResponse> {
   const config = getSpreadsheetAdminConfig(env)
-  if (!config || !isServiceAccountConfigured(env)) {
+  const serviceAccountConfigured = isServiceAccountConfigured(env)
+  const envSummary = getEnvDebugSummary(env)
+
+  debugLog(env, 'question sync env summary', envSummary)
+
+  if (!config || !serviceAccountConfigured) {
+    warnLog(env, 'question sync aborted because spreadsheet env is incomplete', {
+      ...envSummary,
+      hasSpreadsheetConfig: Boolean(config),
+      serviceAccountConfigured,
+    })
     throw new Error('spreadsheet-sync-not-configured')
   }
 
@@ -115,8 +271,20 @@ export async function syncQuestionsFromSpreadsheet(
         }),
     })
 
+    debugLog(env, 'question sync completed', {
+      ...envSummary,
+      source: synced.source,
+      questionVersion: synced.questionSet.version,
+      questionCount: synced.questionSet.questions.length,
+    })
+
     return toQuestionResponse(synced.questionSet, synced.source)
   } catch (error) {
+    errorLog(env, 'question sync failed', {
+      ...envSummary,
+      error: getErrorMessage(error),
+      ...getErrorDebugPayload(error),
+    })
     throw error
   }
 }
@@ -127,7 +295,23 @@ export async function saveAnalysisResultToSpreadsheet(
   deps: SpreadsheetAdminRuntimeDeps = {},
 ): Promise<SaveResultResponse> {
   const config = getSpreadsheetAdminConfig(env)
-  if (!config || !isServiceAccountConfigured(env)) {
+  const serviceAccountConfigured = isServiceAccountConfigured(env)
+  const envSummary = getEnvDebugSummary(env)
+
+  debugLog(env, 'result save env summary', {
+    ...envSummary,
+    sessionId: record.sessionId,
+    questionVersion: record.questionVersion,
+    birthTimeKnowledge: record.birthTimeKnowledge,
+  })
+
+  if (!config || !serviceAccountConfigured) {
+    warnLog(env, 'result save skipped because spreadsheet env is incomplete', {
+      ...envSummary,
+      sessionId: record.sessionId,
+      hasSpreadsheetConfig: Boolean(config),
+      serviceAccountConfigured,
+    })
     return { saved: false, reason: 'not-configured' }
   }
 
@@ -140,8 +324,20 @@ export async function saveAnalysisResultToSpreadsheet(
       record,
     })
 
+    debugLog(env, 'result save completed', {
+      ...envSummary,
+      sessionId: record.sessionId,
+      resultsRange: config.resultsRange,
+    })
+
     return { saved: true }
-  } catch {
+  } catch (error) {
+    errorLog(env, 'result save failed', {
+      ...envSummary,
+      sessionId: record.sessionId,
+      error: getErrorMessage(error),
+      ...getErrorDebugPayload(error),
+    })
     return { saved: false, reason: 'save-failed' }
   }
 }
