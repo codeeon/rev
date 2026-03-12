@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { ENGINE_SETTINGS } from '@workspace/time-inference'
 import { setQuestionSyncResolverForTest } from './route-deps'
 import { GET } from './route'
 
@@ -33,15 +32,13 @@ test.afterEach(() => {
   }
 })
 
-test('GET returns engine-default questions when spreadsheet sync is not configured', async () => {
+test('GET returns 503 when spreadsheet sync is not configured', async () => {
   const response = await GET()
-  assert.equal(response.status, 200)
+  assert.equal(response.status, 503)
 
   const payload = await response.json()
-  assert.equal(payload.source, 'engine-default')
-  assert.equal(payload.questionVersion, ENGINE_SETTINGS.version)
-  assert.ok(Array.isArray(payload.questions))
-  assert.ok(payload.questions.length > 0)
+  assert.equal(payload.error, 'question-sync-failed')
+  assert.equal(payload.message, 'spreadsheet-sync-not-configured')
 })
 
 test('GET uses injected resolver payload in tests', async () => {
@@ -59,15 +56,15 @@ test('GET uses injected resolver payload in tests', async () => {
   assert.equal(payload.questionVersion, '2026.03.03')
 })
 
-test('GET falls back to default response when injected resolver throws', async () => {
+test('GET returns 503 when injected resolver throws', async () => {
   setQuestionSyncResolverForTest(async () => {
     throw new Error('resolver failed')
   })
 
   const response = await GET()
-  assert.equal(response.status, 200)
+  assert.equal(response.status, 503)
 
   const payload = await response.json()
-  assert.equal(payload.source, 'engine-default')
-  assert.equal(payload.warning, 'question-sync-unexpected-error')
+  assert.equal(payload.error, 'question-sync-failed')
+  assert.equal(payload.message, 'resolver failed')
 })

@@ -69,11 +69,8 @@ function createValidRecord() {
   }
 }
 
-test('syncQuestionsFromSpreadsheet returns engine defaults when env is not configured', async () => {
-  const payload = await syncQuestionsFromSpreadsheet({})
-
-  assert.equal(payload.source, 'engine-default')
-  assert.ok(payload.questions.length > 0)
+test('syncQuestionsFromSpreadsheet throws when env is not configured', async () => {
+  await assert.rejects(() => syncQuestionsFromSpreadsheet({}), /spreadsheet-sync-not-configured/)
 })
 
 test('syncQuestionsFromSpreadsheet resolves spreadsheet payload through injected client', async () => {

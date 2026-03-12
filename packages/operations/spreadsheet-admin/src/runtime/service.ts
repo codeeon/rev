@@ -4,7 +4,7 @@ import {
   loadServiceAccountCredentialsFromEnv,
   type GoogleSheetsClient,
 } from '@workspace/google-sheets/server'
-import { ENGINE_QUESTIONS, ENGINE_SETTINGS, type EngineQuestion } from '@workspace/time-inference'
+import type { EngineQuestion } from '@workspace/time-inference'
 import { loadQuestionSetFromSheet } from '../question-source/load-question-set'
 import type { NormalizedQuestionSet } from '../question-source/normalize'
 import { appendAnalysisResult } from '../result-sink/append-result'
@@ -26,7 +26,7 @@ interface SpreadsheetAdminConfig {
 }
 
 export interface QuestionSyncResponse {
-  source: 'spreadsheet-latest' | 'spreadsheet-fallback' | 'engine-default'
+  source: 'spreadsheet-latest' | 'spreadsheet-fallback'
   questionVersion: string
   questions: EngineQuestion[]
   warning?: string
@@ -77,14 +77,6 @@ function createGoogleSheetsClientFromEnv(env: NodeJS.ProcessEnv): GoogleSheetsCl
   })
 }
 
-function toDefaultQuestionResponse(warning?: string): QuestionSyncResponse {
-  return {
-    source: 'engine-default',
-    questionVersion: ENGINE_SETTINGS.version,
-    questions: ENGINE_QUESTIONS,
-    warning,
-  }
-}
 
 function toQuestionResponse(questionSet: NormalizedQuestionSet, source: 'latest' | 'last-known-good'): QuestionSyncResponse {
   return {
@@ -108,7 +100,7 @@ export async function syncQuestionsFromSpreadsheet(
 ): Promise<QuestionSyncResponse> {
   const config = getSpreadsheetAdminConfig(env)
   if (!config || !isServiceAccountConfigured(env)) {
-    return toDefaultQuestionResponse()
+    throw new Error('spreadsheet-sync-not-configured')
   }
 
   try {
@@ -124,8 +116,8 @@ export async function syncQuestionsFromSpreadsheet(
     })
 
     return toQuestionResponse(synced.questionSet, synced.source)
-  } catch {
-    return toDefaultQuestionResponse('question-sync-failed')
+  } catch (error) {
+    throw error
   }
 }
 
