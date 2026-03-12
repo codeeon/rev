@@ -142,18 +142,25 @@ export async function POST(req: Request) {
   try {
     const sajuResult = analyzeSaju(birthInfo, inferredHour)
     const prompt = buildAnalysisPrompt({ sajuResult, inferredHour })
+    let textStream: AsyncIterable<string>
+
+    try {
+      textStream = getAnalyzeTextStreamer()(prompt)
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error: 'Failed to generate analysis text',
+          message: error instanceof Error ? error.message : 'Unknown analysis text generation error',
+          sajuResult,
+        },
+        { status: 502 },
+      )
+    }
+
     const encoder = new TextEncoder()
     const responseStream = new ReadableStream<Uint8Array>({
       async start(controller) {
         controller.enqueue(encoder.encode(encodeAnalyzeMetaLine({ sajuResult })))
-
-        let textStream: AsyncIterable<string>
-        try {
-          textStream = getAnalyzeTextStreamer()(prompt)
-        } catch {
-          controller.close()
-          return
-        }
 
         try {
           for await (const chunk of textStream) {

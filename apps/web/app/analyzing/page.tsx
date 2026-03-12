@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAppState } from '@/lib/store'
 import { parseAnalysisSections } from '@/lib/ai/analysis-sections'
 import { resolveAnalyzeStreamBuffer } from '@/lib/ai/stream-protocol'
+import type { SajuResult } from '@workspace/saju-core'
 import { isValidBirthInfo, isValidInferredHour } from '@workspace/saju-core'
 import { trackFunnelEvent } from '@/lib/analytics'
 
@@ -22,26 +23,42 @@ export default function AnalyzingPage() {
   const [messageIndex, setMessageIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const [dots, setDots] = useState('')
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
   const analysisStarted = useRef(false)
+
+  function readAnalyzeErrorBody(payload: unknown): { message: string | null; sajuResult: SajuResult | null } {
+    if (!payload || typeof payload !== 'object') {
+      return { message: null, sajuResult: null }
+    }
+
+    const record = payload as { message?: unknown; sajuResult?: unknown }
+    return {
+      message: typeof record.message === 'string' && record.message.trim() ? record.message : null,
+      sajuResult: (record.sajuResult ?? null) as SajuResult | null,
+    }
+  }
 
   // Rotating loading messages
   useEffect(() => {
+    if (analysisError) return
     const interval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length)
     }, 2500)
     return () => clearInterval(interval)
-  }, [])
+  }, [analysisError])
 
   // Animated dots
   useEffect(() => {
+    if (analysisError) return
     const interval = setInterval(() => {
       setDots((prev) => (prev.length >= 3 ? '' : prev + '.'))
     }, 500)
     return () => clearInterval(interval)
-  }, [])
+  }, [analysisError])
 
   // Progress bar animation
   useEffect(() => {
+    if (analysisError) return
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 90) return prev
@@ -49,7 +66,7 @@ export default function AnalyzingPage() {
       })
     }, 600)
     return () => clearInterval(interval)
-  }, [])
+  }, [analysisError])
 
   // Run analysis
   useEffect(() => {
@@ -73,10 +90,10 @@ export default function AnalyzingPage() {
       const birthInfo = birthInfoCandidate
       const inferredHour = inferredHourCandidate
       dispatch({ type: 'SET_ANALYZING', payload: true })
+      setAnalysisError(null)
       let hasAuthoritativeSajuResult = false
 
       try {
-
         // Call AI API
         const response = await fetch('/api/analyze', {
           method: 'POST',
@@ -88,7 +105,24 @@ export default function AnalyzingPage() {
           }),
         })
 
-        if (!response.ok) throw new Error('Analysis failed')
+        if (!response.ok) {
+          const errorBody = readAnalyzeErrorBody(await response.json().catch(() => null))
+
+          if (errorBody.sajuResult) {
+            dispatch({ type: 'SET_SAJU_RESULT', payload: errorBody.sajuResult })
+            trackFunnelEvent('analysis_failure', {
+              birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
+            })
+            dispatch({ type: 'SET_ANALYZING', payload: false })
+            setProgress(100)
+            setTimeout(() => {
+              router.push('/result')
+            }, 500)
+            return
+          }
+
+          throw new Error(errorBody.message ?? 'Analysis failed')
+        }
 
         const reader = response.body?.getReader()
         const decoder = new TextDecoder()
@@ -167,20 +201,46 @@ export default function AnalyzingPage() {
         setTimeout(() => {
           router.push('/result')
         }, 500)
-      } catch {
+      } catch (error) {
         trackFunnelEvent('analysis_failure', {
           birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
         })
         dispatch({ type: 'SET_ANALYZING', payload: false })
         setProgress(100)
-        setTimeout(() => {
-          router.push(hasAuthoritativeSajuResult ? '/result' : '/input')
-        }, 500)
+        if (hasAuthoritativeSajuResult) {
+          setTimeout(() => {
+            router.push('/result')
+          }, 500)
+          return
+        }
+
+        setAnalysisError(error instanceof Error ? error.message : '분석을 완료하지 못했습니다.')
       }
     }
 
     runAnalysis()
-  }, [])
+  }, [dispatch, router, state.birthInfo, state.birthTimeKnowledge, state.inferredHour, state.surveyAnswers])
+
+  if (analysisError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-8">
+        <div className="w-full max-w-[320px] rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+          <h2 className="mb-3 text-[20px] font-bold text-foreground">
+            분석을 완료하지 못했습니다
+          </h2>
+          <p className="mb-6 whitespace-pre-wrap text-[14px] leading-relaxed text-muted-foreground">
+            {analysisError}
+          </p>
+          <button
+            onClick={() => router.push('/input')}
+            className="w-full rounded-xl bg-primary px-6 py-3 text-[15px] font-semibold text-primary-foreground"
+          >
+            처음부터 다시 하기
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-8">

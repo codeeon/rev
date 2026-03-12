@@ -130,7 +130,7 @@ test('POST returns success stream with metadata header and text body contract', 
   assert.match(bodyText, /### 기본 성격 및 성향/)
 })
 
-test('POST still returns authoritative metadata when streamer throws synchronously', async () => {
+test('POST returns 502 with sajuResult when streamer throws synchronously', async () => {
   clearRateLimitStore()
 
   setAnalyzeTextStreamerForTest(() => {
@@ -139,16 +139,9 @@ test('POST still returns authoritative metadata when streamer throws synchronous
 
   const response = await POST(requestWithBody(createValidRequestBody()))
 
-  assert.equal(response.status, 200)
-  assert.match(response.headers.get('content-type') ?? '', /^text\/plain/i)
-
-  const bodyText = await response.text()
-  const firstLineEnd = bodyText.indexOf('\n')
-  assert.ok(firstLineEnd >= 0)
-
-  const metaLine = bodyText.slice(0, firstLineEnd + 1)
-  const meta = parseAnalyzeMetaLine(metaLine)
-
-  assert.ok(meta)
-  assert.equal(typeof meta.sajuResult.dayMaster, 'string')
+  assert.equal(response.status, 502)
+  const payload = await response.json()
+  assert.equal(payload.error, 'Failed to generate analysis text')
+  assert.equal(payload.message, 'stream bootstrap failed')
+  assert.equal(typeof payload.sajuResult?.dayMaster, 'string')
 })

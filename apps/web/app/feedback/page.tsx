@@ -39,6 +39,27 @@ export default function FeedbackPage() {
     return (payload as { saved?: unknown }).saved === true
   }
 
+  function readSaveReason(payload: unknown): string | null {
+    if (!payload || typeof payload !== 'object') {
+      return null
+    }
+
+    const reason = (payload as { reason?: unknown }).reason
+    return typeof reason === 'string' && reason.trim() ? reason : null
+  }
+
+  function getSubmitErrorMessage(reason: string | null): string {
+    if (reason === 'not-configured') {
+      return '피드백 저장 설정이 완료되지 않았습니다. 잠시 후 다시 시도해주세요.'
+    }
+
+    if (reason === 'save-failed') {
+      return '피드백 저장 권한 또는 시트 설정을 확인해주세요. 잠시 후 다시 시도해주세요.'
+    }
+
+    return '피드백을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.'
+  }
+
   async function handleSubmit() {
     if (isSubmitting) {
       return
@@ -97,6 +118,7 @@ export default function FeedbackPage() {
       }).catch(() => null)
       const responseBody: unknown = response ? await response.json().catch(() => null) : null
       const feedbackSaved = readSavedFlag(responseBody)
+      const saveReason = readSaveReason(responseBody)
 
       trackFunnelEvent('submit_feedback', {
         label: accuracy || 'unset',
@@ -105,8 +127,8 @@ export default function FeedbackPage() {
         birth_time_knowledge: state.birthTimeKnowledge ?? 'unknown',
       })
 
-      if (!response?.ok) {
-        setSubmitError('피드백을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.')
+      if (!response?.ok || !feedbackSaved) {
+        setSubmitError(getSubmitErrorMessage(saveReason))
         return
       }
 
