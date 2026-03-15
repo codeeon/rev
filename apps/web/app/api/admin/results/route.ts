@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { BirthTimeKnowledge } from '@workspace/spreadsheet-admin/server'
-import { getAdminSessionStatus } from '@/lib/admin-access'
+import { getRequiredCapabilityError } from '@/lib/admin-access'
 import { getAdminRouteDeps } from '../route-deps'
 
 function readPositiveInteger(value: string | null): number | undefined {
@@ -37,14 +37,9 @@ function parseBirthTimeKnowledge(value: string | null): BirthTimeKnowledge | und
 export async function GET(request: Request) {
   const deps = getAdminRouteDeps()
   const session = await deps.auth()
-  const sessionStatus = getAdminSessionStatus(session)
-
-  if (sessionStatus === 'unauthorized') {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  }
-
-  if (sessionStatus === 'forbidden') {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  const capabilityError = getRequiredCapabilityError(session, 'results.read')
+  if (capabilityError) {
+    return NextResponse.json({ error: capabilityError }, { status: capabilityError === 'unauthorized' ? 401 : 403 })
   }
 
   try {

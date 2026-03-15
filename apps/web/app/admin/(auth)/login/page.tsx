@@ -1,5 +1,5 @@
 import { auth, signIn, signOut } from '@/auth'
-import { getAllowedAdminEmails, hasAdminSessionAccess, isAdminAuthConfigured } from '@/lib/admin-access'
+import { getConfiguredAdminCount, hasAdminSessionAccess, isAdminAuthConfigured } from '@/lib/admin-access'
 import { redirect } from 'next/navigation'
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -34,7 +34,7 @@ export default async function AdminLoginPage({
   const resolvedSearchParams = (await searchParams) ?? {}
   const errorMessage = resolveErrorMessage(resolvedSearchParams.error)
   const authConfigured = isAdminAuthConfigured()
-  const allowedAdminCount = getAllowedAdminEmails().length
+  const allowedAdminCount = getConfiguredAdminCount()
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-10">
@@ -59,7 +59,7 @@ export default async function AdminLoginPage({
 
         {allowedAdminCount === 0 ? (
           <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            `ADMIN_ALLOWED_EMAILS`가 비어 있습니다. 현재는 어떤 계정도 admin에 들어갈 수 없습니다.
+            `ADMIN_ALLOWED_EMAILS` 또는 role email env가 비어 있습니다. 현재는 어떤 계정도 admin에 들어갈 수 없습니다.
           </div>
         ) : null}
 

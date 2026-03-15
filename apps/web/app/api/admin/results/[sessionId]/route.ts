@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminSessionStatus } from '@/lib/admin-access'
+import { getRequiredCapabilityError } from '@/lib/admin-access'
 import { getAdminRouteDeps } from '../../route-deps'
 
 export async function GET(
@@ -8,14 +8,9 @@ export async function GET(
 ) {
   const deps = getAdminRouteDeps()
   const session = await deps.auth()
-  const sessionStatus = getAdminSessionStatus(session)
-
-  if (sessionStatus === 'unauthorized') {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  }
-
-  if (sessionStatus === 'forbidden') {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  const capabilityError = getRequiredCapabilityError(session, 'results.read')
+  if (capabilityError) {
+    return NextResponse.json({ error: capabilityError }, { status: capabilityError === 'unauthorized' ? 401 : 403 })
   }
 
   const { sessionId } = await context.params

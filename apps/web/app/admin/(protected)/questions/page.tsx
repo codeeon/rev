@@ -1,9 +1,14 @@
+import Link from 'next/link'
 import { QuestionsTable } from '@/components/admin/questions-table'
+import { DistributionCard } from '@/components/admin/distribution-card'
+import { AdminStatCard } from '@/components/admin/stat-card'
+import { summarizeQuestionSet } from '@/lib/admin-insights'
 import { syncQuestionsFromSpreadsheet } from '@workspace/spreadsheet-admin/server'
 
 export default async function AdminQuestionsPage() {
   try {
     const payload = await syncQuestionsFromSpreadsheet()
+    const summary = summarizeQuestionSet(payload.questions)
 
     return (
       <div className="space-y-4">
@@ -20,9 +25,48 @@ export default async function AdminQuestionsPage() {
               <div className="mt-1 text-lg font-semibold text-slate-900">{payload.questionVersion}</div>
             </div>
           </div>
-          <div className="mt-5 flex gap-3 text-sm text-slate-600">
+          <div className="mt-5 flex flex-wrap gap-3 text-sm text-slate-600">
             <span className="rounded-full bg-slate-100 px-3 py-1.5">질문 수 {payload.questions.length}</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1.5">옵션 수 {summary.totalOptions}</span>
+            <Link
+              className="rounded-full border border-slate-300 px-3 py-1.5 font-medium text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+              href={`/admin/questions/${encodeURIComponent(payload.questionVersion)}`}
+            >
+              버전 상세
+            </Link>
+            <Link
+              className="rounded-full border border-slate-300 px-3 py-1.5 font-medium text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+              href={`/admin/questions/${encodeURIComponent(payload.questionVersion)}/edit`}
+            >
+              편집 골격
+            </Link>
+            <Link
+              className="rounded-full border border-slate-300 px-3 py-1.5 font-medium text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+              href="/admin/questions/publish"
+            >
+              publish 확인
+            </Link>
           </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <AdminStatCard label="Questions" value={String(summary.totalQuestions)} detail="현재 published set 기준" />
+          <AdminStatCard label="Options" value={String(summary.totalOptions)} detail={`질문당 평균 ${summary.averageOptionsPerQuestion.toFixed(1)}개`} />
+          <AdminStatCard label="Roles" value={String(summary.roleDistribution.length)} detail={summary.missingRoles.length > 0 ? `누락 ${summary.missingRoles.join(', ')}` : '필수 role 모두 포함'} />
+          <AdminStatCard label="Weight" value={summary.totalWeight.toFixed(1)} detail={`평균 ${summary.averageWeight.toFixed(1)}`} />
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          <DistributionCard
+            title="Role 분포"
+            description="현재 질문 세트의 structure role 구성입니다."
+            items={summary.roleDistribution}
+          />
+          <DistributionCard
+            title="Category 분포"
+            description="편집 우선순위를 잡을 때 기준으로 삼을 category 묶음입니다."
+            items={summary.categoryDistribution}
+          />
         </div>
 
         <QuestionsTable questions={payload.questions} />

@@ -1,0 +1,67 @@
+import { NextResponse } from 'next/server'
+import { getRequiredCapabilityError } from '@/lib/admin-access'
+import { getAdminRouteDeps } from '../route-deps'
+
+function readPositiveInteger(value: string | null): number | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    return undefined
+  }
+
+  return parsed
+}
+
+function readString(value: string | null): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function parseActionFamily(value: string | null): 'access' | 'mutation' | undefined | null {
+  const trimmed = readString(value)
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed === 'access' || trimmed === 'mutation') {
+    return trimmed
+  }
+
+  return null
+}
+
+export async function GET(request: Request) {
+  const deps = getAdminRouteDeps()
+  const session = await deps.auth()
+  const capabilityError = getRequiredCapabilityError(session, 'roles.manage')
+  if (capabilityError) {
+    return NextResponse.json({ error: capabilityError }, { status: capabilityError === 'unauthorized' ? 401 : 403 })
+  }
+
+  try {
+    const url = new URL(request.url)
+    const actionFamily = parseActionFamily(url.searchParams.get('actionFamily'))
+    if (actionFamily === null) {
+      return NextResponse.json({ error: 'invalid-action-family' }, { status: 400 })
+    }
+
+    const payload = await deps.listAudit({
+      limit: readPositiveInteger(url.searchParams.get('limit')),
+      actionFamily,
+      actorEmail: readString(url.searchParams.get('actorEmail')),
+    })
+
+    return NextResponse.json(payload)
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: 'admin-audit-load-failed',
+        message: error instanceof Error ? error.message : 'Unknown admin audit load error',
+      },
+      { status: 503 },
+    )
+  }
+}

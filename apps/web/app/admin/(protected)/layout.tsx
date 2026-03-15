@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
-import { getAdminSessionStatus } from '@/lib/admin-access'
+import { getAdminSessionRole, getAdminSessionStatus } from '@/lib/admin-access'
 import { AdminShell } from '@/components/admin/admin-shell'
 
 export default async function AdminProtectedLayout({
@@ -19,5 +19,9 @@ export default async function AdminProtectedLayout({
     redirect('/admin/login?error=AccessDenied')
   }
 
-  return <AdminShell userEmail={session?.user?.email ?? 'unknown'}>{children}</AdminShell>
+  return (
+    <AdminShell userEmail={session?.user?.email ?? 'unknown'} userRole={getAdminSessionRole(session)}>
+      {children}
+    </AdminShell>
+  )
 }
