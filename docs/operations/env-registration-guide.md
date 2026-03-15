@@ -56,19 +56,28 @@ cp apps/web/.env.example apps/web/.env.local
 | `AUTH_GOOGLE_ID` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | Google OAuth client ID |
 | `AUTH_GOOGLE_SECRET` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | Google OAuth client secret |
 | `ADMIN_ALLOWED_EMAILS` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | admin 접근을 허용할 이메일 목록, 쉼표 구분 |
+| `ADMIN_VIEWER_EMAILS` | 선택 | `apps/web/.env.local`, Vercel | `viewer` 역할로 고정할 이메일 목록 |
+| `ADMIN_EDITOR_EMAILS` | 선택 | `apps/web/.env.local`, Vercel | `editor` 역할로 고정할 이메일 목록 |
+| `ADMIN_OWNER_EMAILS` | 선택 | `apps/web/.env.local`, Vercel | `owner` 역할로 고정할 이메일 목록 |
+| `ADMIN_DEFAULT_ROLE` | 선택 | `apps/web/.env.local`, Vercel | explicit role map이 없을 때 allowlist admin에 줄 기본 role, 기본 `owner` |
 | `AUTH_URL` | 로컬 `pnpm --filter web start` 검증 시 권장 | `apps/web/.env.local` | 예: `http://localhost:3000`, Auth.js host trust 및 callback URL 기준 |
 
 예시:
 
 ```env
 ADMIN_ALLOWED_EMAILS=owner@example.com,ops@example.com
+ADMIN_EDITOR_EMAILS=editor@example.com
+ADMIN_OWNER_EMAILS=owner@example.com
+ADMIN_DEFAULT_ROLE=owner
 AUTH_URL=http://localhost:3000
 ```
 
 메모:
 
 - `AUTH_SECRET`가 비어 있으면 Auth.js 세션이 안정적으로 동작하지 않는다.
-- `ADMIN_ALLOWED_EMAILS`는 서버에서만 읽는 allowlist다.
+- `ADMIN_ALLOWED_EMAILS`는 transition용 allowlist다.
+- `ADMIN_VIEWER_EMAILS`, `ADMIN_EDITOR_EMAILS`, `ADMIN_OWNER_EMAILS`가 있으면 이 값이 session role 계산에 우선한다.
+- explicit role env가 없으면 `ADMIN_ALLOWED_EMAILS` 사용자는 `ADMIN_DEFAULT_ROLE`을 받는다. 기본값은 호환성을 위해 `owner`다.
 - 이메일은 `trim + lowercase` 기준으로 비교한다.
 - `pnpm dev`에서는 대개 없어도 되지만, `pnpm --filter web start` 같은 production mode 로컬 검증에서는 `AUTH_URL`이 없으면 `UntrustedHost`가 발생할 수 있다.
 
@@ -98,6 +107,12 @@ AUTH_URL=http://localhost:3000
 | `GOOGLE_SPREADSHEET_ADMIN_ID` | Sheets 사용 시 필수 | `apps/web/.env.local`, Vercel | 질문/결과 시트가 들어 있는 스프레드시트 ID |
 | `GOOGLE_SPREADSHEET_QUESTIONS_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `Questions!A:K` |
 | `GOOGLE_SPREADSHEET_RESULTS_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `Results!A:J` |
+| `GOOGLE_SPREADSHEET_QUESTION_DRAFTS_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `QuestionDrafts!A:P` |
+| `GOOGLE_SPREADSHEET_APPROVAL_REQUESTS_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `ApprovalRequests!A:L` |
+| `GOOGLE_SPREADSHEET_ADMIN_AUDIT_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `AdminAuditLog!A:H` |
+| `GOOGLE_SPREADSHEET_ADMIN_ACCESS_AUDIT_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `AdminAccessLog!A:H` |
+| `GOOGLE_SPREADSHEET_ADMIN_MUTATION_AUDIT_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `AdminMutationLog!A:H` |
+| `GOOGLE_SPREADSHEET_APPROVAL_LOG_RANGE` | 선택 | `apps/web/.env.local`, Vercel | 기본 `ApprovalLog!A:J` |
 
 `GOOGLE_SPREADSHEET_ADMIN_ID`는 스프레드시트 URL에서 가져온다.
 
@@ -110,6 +125,11 @@ https://docs.google.com/spreadsheets/d/<이 부분이 스프레드시트 ID>/edi
 메모:
 
 - 질문 동기화와 결과 저장을 둘 다 쓰면 동일한 스프레드시트 ID를 사용한다.
+- 질문 draft는 같은 스프레드시트 안의 `QuestionDrafts!A:P` 탭을 기본값으로 사용한다.
+- pre-publish approval thread는 `ApprovalRequests!A:L` 탭을 기본값으로 사용한다.
+- audit combined view는 `AdminAuditLog!A:H`를 기본값으로 사용한다.
+- access deny는 `AdminAccessLog!A:H`, mutation은 `AdminMutationLog!A:H`에 분리 저장한다.
+- approval log는 같은 스프레드시트 안의 `ApprovalLog!A:J` 탭을 기본값으로 사용한다.
 - range를 바꾸지 않는다면 `.env.example` 기본값을 그대로 유지하면 된다.
 
 ### 5. Google 서비스 계정 인증
