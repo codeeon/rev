@@ -28,45 +28,71 @@ test('GET returns 403 when session is not admin', async () => {
 })
 
 test('GET returns results payload when admin session is valid', async () => {
+  let receivedOptions: Record<string, unknown> | undefined
+
   setAdminRouteDepsForTest({
     auth: async () => ({ user: { email: 'owner@example.com', isAdmin: true } }) as never,
-    listResults: async () => ({
-      items: [
-        {
-          rowNumber: 2,
-          sessionId: 'session-1',
-          timestamp: '2026-03-10T00:00:00.000Z',
-          engineVersion: '4.1',
-          questionVersion: '4.1',
-          birthTimeKnowledge: 'unknown',
-          surveyAnswers: [],
-          inferenceResult: {
-            inferredZishi: '자시',
-            confidence: 84,
-            isCusp: false,
-            topCandidates: [],
+    listResults: async (options) => {
+      receivedOptions = options
+
+      return {
+        items: [
+          {
+            rowNumber: 2,
+            sessionId: 'session-1',
+            timestamp: '2026-03-10T00:00:00.000Z',
+            engineVersion: '4.1',
+            questionVersion: '4.1',
+            birthTimeKnowledge: 'unknown',
+            surveyAnswers: [],
+            inferenceResult: {
+              inferredZishi: '자시',
+              confidence: 84,
+              isCusp: false,
+              topCandidates: [],
+            },
+            monitoring: {
+              top1Prob: 0.84,
+              top2Gap: 0.21,
+              stdSoftmax: 0,
+              stdRawScore: 0,
+              roleInfluence: {},
+              alerts: {},
+            },
           },
-          monitoring: {
-            top1Prob: 0.84,
-            top2Gap: 0.21,
-            stdSoftmax: 0,
-            stdRawScore: 0,
-            roleInfluence: {},
-            alerts: {},
-          },
-        },
-      ],
-      limit: 10,
-    }),
+        ],
+        limit: 10,
+      }
+    },
   })
 
-  const response = await GET(new Request('http://localhost/api/admin/results?limit=10') as never)
+  const response = await GET(
+    new Request(
+      'http://localhost/api/admin/results?limit=10&sessionId=session-1&questionVersion=4.1&birthTimeKnowledge=unknown',
+    ) as never,
+  )
   assert.equal(response.status, 200)
 
   const payload = await response.json()
+  assert.deepEqual(receivedOptions, {
+    limit: 10,
+    sessionId: 'session-1',
+    questionVersion: '4.1',
+    birthTimeKnowledge: 'unknown',
+  })
   assert.equal(payload.items.length, 1)
   assert.equal(payload.items[0]?.sessionId, 'session-1')
   assert.equal(payload.limit, 10)
+})
+
+test('GET returns 400 when birthTimeKnowledge filter is invalid', async () => {
+  setAdminRouteDepsForTest({
+    auth: async () => ({ user: { email: 'owner@example.com', isAdmin: true } }) as never,
+  })
+
+  const response = await GET(new Request('http://localhost/api/admin/results?birthTimeKnowledge=invalid') as never)
+  assert.equal(response.status, 400)
+  assert.deepEqual(await response.json(), { error: 'invalid-birth-time-knowledge' })
 })
 
 test('GET returns 503 when results loading fails', async () => {

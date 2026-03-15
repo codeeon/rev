@@ -1,24 +1,32 @@
 import { auth } from '@/auth'
+import type { Session } from 'next-auth'
 import {
   getAdminResultBySessionIdFromSpreadsheet,
   listAdminResultsFromSpreadsheet,
   syncQuestionsFromSpreadsheet,
+  type BirthTimeKnowledge,
   type QuestionSyncResponse,
   type StoredAnalysisResultRecord,
   type ListAnalysisResultsResponse,
 } from '@workspace/spreadsheet-admin/server'
 
-export type AdminSession = Awaited<ReturnType<typeof auth>>
+export type AdminSession = Session | null
+type AdminAuth = () => Promise<AdminSession>
 
 interface AdminRouteDeps {
-  auth: typeof auth
-  listResults: (options?: { limit?: number; sessionId?: string }) => Promise<ListAnalysisResultsResponse>
+  auth: AdminAuth
+  listResults: (options?: {
+    limit?: number
+    sessionId?: string
+    questionVersion?: string
+    birthTimeKnowledge?: BirthTimeKnowledge
+  }) => Promise<ListAnalysisResultsResponse>
   getResultBySessionId: (sessionId: string) => Promise<StoredAnalysisResultRecord | null>
   listQuestions: () => Promise<QuestionSyncResponse>
 }
 
 const defaultDeps: AdminRouteDeps = {
-  auth,
+  auth: () => auth(),
   listResults: listAdminResultsFromSpreadsheet,
   getResultBySessionId: getAdminResultBySessionIdFromSpreadsheet,
   listQuestions: syncQuestionsFromSpreadsheet,

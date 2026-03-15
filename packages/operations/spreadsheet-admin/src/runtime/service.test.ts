@@ -15,6 +15,21 @@ const TEST_ENV = {
   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: '-----BEGIN PRIVATE KEY-----\\nLINE\\n-----END PRIVATE KEY-----\\n',
 }
 
+function selectRowsForRange(rows: string[][], range: string): string[][] {
+  if (range === 'Results!A:J') {
+    return rows
+  }
+
+  const match = range.match(/^Results!A(\d+):J(\d+)$/)
+  if (match) {
+    const startRow = Number(match[1])
+    const endRow = Number(match[2])
+    return rows.slice(startRow - 1, endRow)
+  }
+
+  return []
+}
+
 function createFakeSheetsClient(): GoogleSheetsClient {
   return {
     values: {
@@ -44,50 +59,60 @@ function createFakeSheetsClient(): GoogleSheetsClient {
       append: async () => ({ updates: { updatedRows: 1 } }),
     },
     spreadsheets: {
+      get: async () => ({ sheets: [] }),
       batchUpdate: async () => ({ replies: [] }),
     },
   }
 }
 
 function createFakeSheetsClientForResults(): GoogleSheetsClient {
+  const rows = [
+    [
+      'sessionId',
+      'timestamp',
+      'engineVersion',
+      'questionVersion',
+      'birthTimeKnowledge',
+      'approximateRangeJson',
+      'surveyAnswersJson',
+      'inferenceResultJson',
+      'monitoringJson',
+      'feedbackJson',
+    ],
+    [
+      'session-1',
+      '2026-03-10T00:00:00.000Z',
+      '4.1',
+      '4.1',
+      'unknown',
+      'null',
+      '[{"questionId":"Q1","optionIndex":0}]',
+      '{"inferredZishi":"자시","confidence":84,"isCusp":false,"topCandidates":[{"branch":"子","branchKr":"자","score":1.2,"percentage":84}]}',
+      '{"top1Prob":0.84,"top2Gap":0.21,"stdSoftmax":0,"stdRawScore":0,"roleInfluence":{},"alerts":{}}',
+      '{"rating":5,"accuracy":"accurate"}',
+    ],
+  ]
+
   return {
     values: {
-      get: async ({ range }) => ({
-        values:
-          range === 'Results!A:J'
-            ? [
-                [
-                  'sessionId',
-                  'timestamp',
-                  'engineVersion',
-                  'questionVersion',
-                  'birthTimeKnowledge',
-                  'approximateRangeJson',
-                  'surveyAnswersJson',
-                  'inferenceResultJson',
-                  'monitoringJson',
-                  'feedbackJson',
-                ],
-                [
-                  'session-1',
-                  '2026-03-10T00:00:00.000Z',
-                  '4.1',
-                  '4.1',
-                  'unknown',
-                  'null',
-                  '[{"questionId":"Q1","optionIndex":0}]',
-                  '{"inferredZishi":"자시","confidence":84,"isCusp":false,"topCandidates":[{"branch":"子","branchKr":"자","score":1.2,"percentage":84}]}',
-                  '{"top1Prob":0.84,"top2Gap":0.21,"stdSoftmax":0,"stdRawScore":0,"roleInfluence":{},"alerts":{}}',
-                  '{"rating":5,"accuracy":"accurate"}',
-                ],
-              ]
-            : [],
-      }),
+      get: async ({ range }) => ({ values: selectRowsForRange(rows, range) }),
       batchGet: async () => ({ valueRanges: [] }),
       batchUpdate: async () => ({ totalUpdatedRows: 0 }),
       append: async () => ({ updates: { updatedRows: 1 } }),
     },
     spreadsheets: {
+      get: async () => ({
+        sheets: [
+          {
+            properties: {
+              title: 'Results',
+              gridProperties: {
+                rowCount: 1000,
+              },
+            },
+          },
+        ],
+      }),
       batchUpdate: async () => ({ replies: [] }),
     },
   }

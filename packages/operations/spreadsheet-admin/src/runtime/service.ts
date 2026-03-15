@@ -9,7 +9,7 @@ import type { EngineQuestion } from '@workspace/time-inference'
 import { loadQuestionSetFromSheet } from '../question-source/load-question-set'
 import type { NormalizedQuestionSet } from '../question-source/normalize'
 import { appendAnalysisResult } from '../result-sink/append-result'
-import type { AnalysisResultRecord } from '../result-sink/result-schema'
+import type { AnalysisResultRecord, BirthTimeKnowledge } from '../result-sink/result-schema'
 import {
   getAnalysisResultBySessionId,
   listAnalysisResults,
@@ -66,6 +66,8 @@ export interface SaveResultResponse {
 export interface ListAdminResultsOptions {
   limit?: number
   sessionId?: string
+  questionVersion?: string
+  birthTimeKnowledge?: BirthTimeKnowledge
 }
 
 export interface SpreadsheetAdminRuntimeDeps {
@@ -366,6 +368,8 @@ export async function listAdminResultsFromSpreadsheet(
     ...envSummary,
     limit: options.limit ?? null,
     sessionId: options.sessionId ?? null,
+    questionVersion: options.questionVersion ?? null,
+    birthTimeKnowledge: options.birthTimeKnowledge ?? null,
   })
 
   if (!config || !serviceAccountConfigured) {
@@ -385,6 +389,8 @@ export async function listAdminResultsFromSpreadsheet(
       range: config.resultsRange,
       limit: options.limit,
       sessionId: options.sessionId,
+      questionVersion: options.questionVersion,
+      birthTimeKnowledge: options.birthTimeKnowledge,
     })
 
     debugLog(env, 'result list completed', {
@@ -392,6 +398,8 @@ export async function listAdminResultsFromSpreadsheet(
       returnedCount: payload.items.length,
       limit: payload.limit,
       matchedSessionId: payload.matchedSessionId ?? null,
+      matchedQuestionVersion: payload.matchedQuestionVersion ?? null,
+      matchedBirthTimeKnowledge: payload.matchedBirthTimeKnowledge ?? null,
     })
 
     return payload

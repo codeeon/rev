@@ -8,6 +8,8 @@ import {
 
 const MAX_ADMIN_RESULTS_LIMIT = 100
 const MIN_ADMIN_RESULTS_LIMIT = 1
+const RECENT_RESULTS_SCAN_WINDOW = 200
+const MAX_RESULTS_SCAN_WINDOWS = 5
 
 export interface StoredAnalysisResultRecord extends AnalysisResultRecord {
   rowNumber: number
@@ -19,12 +21,16 @@ export interface ListAnalysisResultsInput {
   range: string
   limit?: number
   sessionId?: string
+  questionVersion?: string
+  birthTimeKnowledge?: BirthTimeKnowledge
 }
 
 export interface ListAnalysisResultsResponse {
   items: StoredAnalysisResultRecord[]
   limit: number
   matchedSessionId?: string
+  matchedQuestionVersion?: string
+  matchedBirthTimeKnowledge?: BirthTimeKnowledge
 }
 
 function clampLimit(limit: number | undefined): number {
@@ -69,6 +75,40 @@ function assertHeaderRow(headerRow: string[]): void {
   }
 }
 
+function unquoteSheetName(value: string): string {
+  const trimmed = value.trim()
+  if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+    return trimmed.slice(1, -1).replace(/''/g, "'")
+  }
+
+  return trimmed
+}
+
+function parseColumnRange(range: string): { sheetName: string; sheetTitle: string; startColumn: string; endColumn: string } | null {
+  const separatorIndex = range.lastIndexOf('!')
+  if (separatorIndex === -1) {
+    return null
+  }
+
+  const sheetName = range.slice(0, separatorIndex)
+  const a1Range = range.slice(separatorIndex + 1).trim()
+  const match = a1Range.match(/^([A-Z]+)(?:\d+)?:([A-Z]+)(?:\d+)?$/i)
+  if (!match) {
+    return null
+  }
+
+  return {
+    sheetName,
+    sheetTitle: unquoteSheetName(sheetName),
+    startColumn: match[1].toUpperCase(),
+    endColumn: match[2].toUpperCase(),
+  }
+}
+
+function buildRange(sheetName: string, startColumn: string, endColumn: string, startRow: number, endRow: number): string {
+  return `${sheetName}!${startColumn}${startRow}:${endColumn}${endRow}`
+}
+
 function parseResultRow(row: SheetRow, rowNumber: number): StoredAnalysisResultRecord {
   const values = row.map(stringifyCell)
   const [
@@ -102,48 +142,171 @@ function parseResultRow(row: SheetRow, rowNumber: number): StoredAnalysisResultR
   return record
 }
 
+function parseResultDataRows(headerRow: string[], rows: SheetRow[], startRowNumber: number): StoredAnalysisResultRecord[] {
+  assertHeaderRow(headerRow)
+
+  return rows
+    .filter(row => row.some(cell => stringifyCell(cell).trim() !== ''))
+    .map((row, index) => parseResultRow(row, startRowNumber + index))
+}
+
 function parseResultRows(rows: SheetRow[]): StoredAnalysisResultRecord[] {
   if (rows.length === 0) {
     return []
   }
 
   const [headerRow, ...dataRows] = rows
-  assertHeaderRow(headerRow.map(stringifyCell))
+  return parseResultDataRows(headerRow.map(stringifyCell), dataRows, 2)
+}
 
-  return dataRows
-    .filter(row => row.some(cell => stringifyCell(cell).trim() !== ''))
-    .map((row, index) => parseResultRow(row, index + 2))
+function matchesFilters(
+  item: StoredAnalysisResultRecord,
+  filters: {
+    sessionId?: string
+    questionVersion?: string
+    birthTimeKnowledge?: BirthTimeKnowledge
+  },
+): boolean {
+  if (filters.sessionId && item.sessionId !== filters.sessionId) {
+    return false
+  }
+
+  if (filters.questionVersion && item.questionVersion !== filters.questionVersion) {
+    return false
+  }
+
+  if (filters.birthTimeKnowledge && item.birthTimeKnowledge !== filters.birthTimeKnowledge) {
+    return false
+  }
+
+  return true
+}
+
+async function getSheetRowCount(
+  client: GoogleSheetsClient,
+  spreadsheetId: string,
+  sheetTitle: string,
+): Promise<number | null> {
+  const response = await client.spreadsheets.get({
+    spreadsheetId,
+    fields: 'sheets.properties.title,sheets.properties.gridProperties.rowCount',
+  })
+
+  const matchingSheet = response.sheets?.find(sheet => sheet.properties?.title === sheetTitle)
+  return matchingSheet?.properties?.gridProperties?.rowCount ?? null
+}
+
+async function listRecentAnalysisResults(input: {
+  client: GoogleSheetsClient
+  spreadsheetId: string
+  range: string
+  limit: number
+  sessionId?: string
+  questionVersion?: string
+  birthTimeKnowledge?: BirthTimeKnowledge
+}): Promise<ListAnalysisResultsResponse | null> {
+  const parsedRange = parseColumnRange(input.range)
+  if (!parsedRange) {
+    return null
+  }
+
+  const headerRange = buildRange(parsedRange.sheetName, parsedRange.startColumn, parsedRange.endColumn, 1, 1)
+  const headerResponse = await input.client.values.get({
+    spreadsheetId: input.spreadsheetId,
+    range: headerRange,
+  })
+  const headerRow = headerResponse.values?.[0]?.map(stringifyCell) ?? []
+  if (headerRow.length === 0) {
+    return {
+      items: [],
+      limit: input.limit,
+      matchedSessionId: input.sessionId,
+      matchedQuestionVersion: input.questionVersion,
+      matchedBirthTimeKnowledge: input.birthTimeKnowledge,
+    }
+  }
+
+  const sheetRowCount = await getSheetRowCount(input.client, input.spreadsheetId, parsedRange.sheetTitle)
+  if (!sheetRowCount || sheetRowCount < 2) {
+    return {
+      items: [],
+      limit: input.limit,
+      matchedSessionId: input.sessionId,
+      matchedQuestionVersion: input.questionVersion,
+      matchedBirthTimeKnowledge: input.birthTimeKnowledge,
+    }
+  }
+
+  const filters = {
+    sessionId: input.sessionId,
+    questionVersion: input.questionVersion,
+    birthTimeKnowledge: input.birthTimeKnowledge,
+  }
+  const items: StoredAnalysisResultRecord[] = []
+  let windowEnd = sheetRowCount
+  let scannedWindows = 0
+
+  while (windowEnd >= 2 && scannedWindows < MAX_RESULTS_SCAN_WINDOWS && items.length < input.limit) {
+    const windowStart = Math.max(2, windowEnd - RECENT_RESULTS_SCAN_WINDOW + 1)
+    const response = await input.client.values.get({
+      spreadsheetId: input.spreadsheetId,
+      range: buildRange(parsedRange.sheetName, parsedRange.startColumn, parsedRange.endColumn, windowStart, windowEnd),
+    })
+    const parsedItems = parseResultDataRows(headerRow, response.values ?? [], windowStart)
+    for (let index = parsedItems.length - 1; index >= 0 && items.length < input.limit; index -= 1) {
+      const item = parsedItems[index]
+      if (item && matchesFilters(item, filters)) {
+        items.push(item)
+      }
+    }
+
+    windowEnd = windowStart - 1
+    scannedWindows += 1
+  }
+
+  return {
+    items,
+    limit: input.limit,
+    matchedSessionId: input.sessionId,
+    matchedQuestionVersion: input.questionVersion,
+    matchedBirthTimeKnowledge: input.birthTimeKnowledge,
+  }
 }
 
 export async function listAnalysisResults(input: ListAnalysisResultsInput): Promise<ListAnalysisResultsResponse> {
   const limit = clampLimit(input.limit)
-  const response = await input.client.values.get({
+  const normalizedSessionId = input.sessionId?.trim() || undefined
+  const normalizedQuestionVersion = input.questionVersion?.trim() || undefined
+  const recentPayload = await listRecentAnalysisResults({
+    client: input.client,
     spreadsheetId: input.spreadsheetId,
     range: input.range,
-  })
-  const rows = response.values ?? []
-  const parsed = parseResultRows(rows)
-  const filtered = input.sessionId
-    ? parsed.filter(item => item.sessionId === input.sessionId)
-    : parsed
-
-  return {
-    items: filtered.reverse().slice(0, limit),
     limit,
-    matchedSessionId: input.sessionId?.trim() || undefined,
+    sessionId: normalizedSessionId,
+    questionVersion: normalizedQuestionVersion,
+    birthTimeKnowledge: input.birthTimeKnowledge,
+  })
+  if (!recentPayload) {
+    throw new Error('results-range-must-use-column-span')
   }
+
+  return recentPayload
 }
 
 export async function getAnalysisResultBySessionId(
   input: Omit<ListAnalysisResultsInput, 'limit'> & { sessionId: string },
 ): Promise<StoredAnalysisResultRecord | null> {
-  const response = await input.client.values.get({
+  const normalizedSessionId = input.sessionId.trim()
+  const recentPayload = await listRecentAnalysisResults({
+    client: input.client,
     spreadsheetId: input.spreadsheetId,
     range: input.range,
+    limit: 1,
+    sessionId: normalizedSessionId,
   })
-  const rows = response.values ?? []
-  const parsed = parseResultRows(rows)
-  const normalizedSessionId = input.sessionId.trim()
+  if (!recentPayload) {
+    throw new Error('results-range-must-use-column-span')
+  }
 
-  return parsed.reverse().find(item => item.sessionId === normalizedSessionId) ?? null
+  return recentPayload.items[0] ?? null
 }

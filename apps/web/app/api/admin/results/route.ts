@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import type { BirthTimeKnowledge } from '@workspace/spreadsheet-admin/server'
 import { getAdminSessionStatus } from '@/lib/admin-access'
 import { getAdminRouteDeps } from '../route-deps'
 
@@ -13,6 +14,24 @@ function readPositiveInteger(value: string | null): number | undefined {
   }
 
   return parsed
+}
+
+function readString(value: string | null): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function parseBirthTimeKnowledge(value: string | null): BirthTimeKnowledge | undefined | null {
+  const trimmed = readString(value)
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed === 'known' || trimmed === 'unknown' || trimmed === 'approximate') {
+    return trimmed
+  }
+
+  return null
 }
 
 export async function GET(request: Request) {
@@ -30,9 +49,16 @@ export async function GET(request: Request) {
 
   try {
     const url = new URL(request.url)
+    const birthTimeKnowledge = parseBirthTimeKnowledge(url.searchParams.get('birthTimeKnowledge'))
+    if (birthTimeKnowledge === null) {
+      return NextResponse.json({ error: 'invalid-birth-time-knowledge' }, { status: 400 })
+    }
+
     const payload = await deps.listResults({
       limit: readPositiveInteger(url.searchParams.get('limit')),
-      sessionId: url.searchParams.get('sessionId')?.trim() || undefined,
+      sessionId: readString(url.searchParams.get('sessionId')),
+      questionVersion: readString(url.searchParams.get('questionVersion')),
+      birthTimeKnowledge,
     })
 
     return NextResponse.json(payload)

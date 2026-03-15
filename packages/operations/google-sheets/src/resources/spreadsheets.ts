@@ -8,12 +8,39 @@ export interface BatchUpdateSpreadsheetInput {
   responseRanges?: string[]
 }
 
+export interface GetSpreadsheetInput {
+  spreadsheetId: string
+  ranges?: string[]
+  includeGridData?: boolean
+  fields?: string
+}
+
+export interface SpreadsheetGridProperties {
+  rowCount?: number
+  columnCount?: number
+}
+
+export interface SpreadsheetSheetProperties {
+  title?: string
+  gridProperties?: SpreadsheetGridProperties
+}
+
+export interface SpreadsheetSheet {
+  properties?: SpreadsheetSheetProperties
+}
+
+export interface GetSpreadsheetResponse {
+  spreadsheetId?: string
+  sheets?: SpreadsheetSheet[]
+}
+
 export interface BatchUpdateSpreadsheetResponse {
   spreadsheetId?: string
   replies?: Array<Record<string, unknown>>
 }
 
 export interface SpreadsheetsResource {
+  get(input: GetSpreadsheetInput): Promise<GetSpreadsheetResponse>
   batchUpdate(input: BatchUpdateSpreadsheetInput): Promise<BatchUpdateSpreadsheetResponse>
 }
 
@@ -25,6 +52,20 @@ function assertRequired(value: string, key: string): void {
 
 export function createSpreadsheetsResource(transport: GoogleSheetsTransport): SpreadsheetsResource {
   return {
+    async get(input) {
+      assertRequired(input.spreadsheetId, 'spreadsheetId')
+
+      return transport.request<GetSpreadsheetResponse>({
+        method: 'GET',
+        path: `/spreadsheets/${input.spreadsheetId}`,
+        query: {
+          ranges: input.ranges,
+          includeGridData: input.includeGridData,
+          fields: input.fields,
+        },
+      })
+    },
+
     async batchUpdate(input) {
       assertRequired(input.spreadsheetId, 'spreadsheetId')
       if (input.requests.length === 0) {

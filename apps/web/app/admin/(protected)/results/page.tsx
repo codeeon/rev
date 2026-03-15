@@ -1,4 +1,7 @@
-import { listAdminResultsFromSpreadsheet } from '@workspace/spreadsheet-admin/server'
+import {
+  listAdminResultsFromSpreadsheet,
+  type BirthTimeKnowledge,
+} from '@workspace/spreadsheet-admin/server'
 import { ResultsTable } from '@/components/admin/results-table'
 
 function readSearchParam(value: string | string[] | undefined): string | undefined {
@@ -9,6 +12,15 @@ function readSearchParam(value: string | string[] | undefined): string | undefin
   return value?.trim() || undefined
 }
 
+function readBirthTimeKnowledgeParam(value: string | string[] | undefined): BirthTimeKnowledge | undefined {
+  const normalizedValue = readSearchParam(value)
+  if (normalizedValue === 'known' || normalizedValue === 'unknown' || normalizedValue === 'approximate') {
+    return normalizedValue
+  }
+
+  return undefined
+}
+
 export default async function AdminResultsPage({
   searchParams,
 }: {
@@ -16,11 +28,15 @@ export default async function AdminResultsPage({
 }) {
   const resolvedSearchParams = (await searchParams) ?? {}
   const sessionId = readSearchParam(resolvedSearchParams.sessionId)
+  const questionVersion = readSearchParam(resolvedSearchParams.questionVersion)
+  const birthTimeKnowledge = readBirthTimeKnowledgeParam(resolvedSearchParams.birthTimeKnowledge)
 
   try {
     const payload = await listAdminResultsFromSpreadsheet({
       limit: 100,
       sessionId,
+      questionVersion,
+      birthTimeKnowledge,
     })
 
     return (
@@ -30,7 +46,7 @@ export default async function AdminResultsPage({
             <div>
               <h2 className="text-lg font-semibold text-slate-900">결과 조회</h2>
               <p className="mt-2 text-sm text-slate-600">
-                최근 최대 100건을 조회합니다. `sessionId`를 입력하면 정확히 일치하는 결과만 필터링합니다.
+                최근 최대 100건을 조회합니다. `sessionId`, `questionVersion`, `birthTimeKnowledge`는 exact match로만 필터링합니다.
               </p>
             </div>
             <div className="rounded-2xl bg-slate-100 px-4 py-3 text-right text-xs text-slate-600">
@@ -39,14 +55,31 @@ export default async function AdminResultsPage({
             </div>
           </div>
 
-          <form action="/admin/results" className="mt-5 flex gap-3">
+          <form action="/admin/results" className="mt-5 grid gap-3 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_200px_auto]">
             <input
               type="text"
               name="sessionId"
               defaultValue={sessionId}
               placeholder="sessionId exact match"
-              className="min-w-0 flex-1 rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500"
+              className="min-w-0 rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500"
             />
+            <input
+              type="text"
+              name="questionVersion"
+              defaultValue={questionVersion}
+              placeholder="questionVersion"
+              className="min-w-0 rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500"
+            />
+            <select
+              name="birthTimeKnowledge"
+              defaultValue={birthTimeKnowledge ?? ''}
+              className="min-w-0 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500"
+            >
+              <option value="">생시 인지 전체</option>
+              <option value="known">known</option>
+              <option value="unknown">unknown</option>
+              <option value="approximate">approximate</option>
+            </select>
             <button
               type="submit"
               className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"

@@ -21,6 +21,7 @@ export function ResultsTable({ items }: ResultsTableProps) {
           <tr>
             <th className="px-4 py-3">Session</th>
             <th className="px-4 py-3">시각</th>
+            <th className="px-4 py-3">질문 버전</th>
             <th className="px-4 py-3">생시 인지</th>
             <th className="px-4 py-3">추론 결과</th>
             <th className="px-4 py-3">신뢰도</th>
@@ -36,6 +37,7 @@ export function ResultsTable({ items }: ResultsTableProps) {
                 </Link>
               </td>
               <td className="px-4 py-3 align-top whitespace-nowrap">{item.timestamp}</td>
+              <td className="px-4 py-3 align-top whitespace-nowrap">{item.questionVersion}</td>
               <td className="px-4 py-3 align-top">{item.birthTimeKnowledge}</td>
               <td className="px-4 py-3 align-top">{item.inferenceResult.inferredZishi}</td>
               <td className="px-4 py-3 align-top">{item.inferenceResult.confidence}%</td>
