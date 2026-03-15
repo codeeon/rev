@@ -8,10 +8,11 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "tsx --test app/api/analyze/route.test.ts app/api/operations/questions/route.test.ts app/api/feedback/route.test.ts app/api/admin/results/route.test.ts app/api/admin/results/[sessionId]/route.test.ts app/api/admin/questions/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts lib/analytics.test.ts lib/admin-access.test.ts components/analytics/ga-script.test.ts",
+    "test": "tsx --test auth.config.test.ts app/api/analyze/route.test.ts app/api/operations/questions/route.test.ts app/api/feedback/route.test.ts app/api/admin/results/route.test.ts app/api/admin/results/[sessionId]/route.test.ts app/api/admin/questions/route.test.ts lib/store.test.ts lib/ai/analysis-sections.test.ts lib/ai/stream-protocol.test.ts lib/analytics.test.ts lib/admin-access.test.ts components/analytics/ga-script.test.ts",
     "test:engine": "pnpm --filter @workspace/time-inference test"
   },
   "dependencies": {
+    "@sentry/core": "^8.55.0",
     "@workspace/base-ui": "workspace:*",
     "@workspace/ga": "workspace:*",
     "@workspace/saju-core": "workspace:*",

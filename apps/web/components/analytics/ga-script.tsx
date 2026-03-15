@@ -8,7 +8,11 @@ export interface GaScriptTags {
   initScript: string
 }
 
-export function resolveGaScriptTags(env: NodeJS.ProcessEnv = process.env): GaScriptTags | null {
+type GaRuntimeEnv = Record<string, string | undefined> & {
+  NEXT_PUBLIC_GA_MEASUREMENT_ID?: string
+}
+
+export function resolveGaScriptTags(env: GaRuntimeEnv = process.env): GaScriptTags | null {
   const measurementId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim()
   if (!measurementId) {
     return null
