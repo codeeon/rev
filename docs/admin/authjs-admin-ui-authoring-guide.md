@@ -281,7 +281,14 @@ admin UI는 브랜드 랜딩 페이지처럼 만들 필요가 없다.
 - raw JSON 상세
 - 명확한 empty/error state
 
-질문 수정, 통계 시각화, publish workflow처럼 조회를 넘어서는 기능은 1차 규칙만으로 확장하지 말고 `authjs-admin-ui-phase-2-expansion-plan.md`의 역할/감사/버전 정책을 먼저 확인한다.
+질문 수정, 통계 시각화, publish workflow처럼 조회를 넘어서는 기능은 1차 규칙만으로 확장하지 말고 아래 문서를 먼저 확인한다.
+
+- `authjs-admin-ui-phase-2-expansion-plan.md`
+- `authjs-admin-ui-phase-2-api-contracts.md`
+- `question-approval-thread-runbook.md`
+- `question-publish-rollback-runbook.md`
+
+현재 publish workflow는 단순 `review-ready -> publish`가 아니라 `ApprovalRequests` 기반 `request -> approve/reject -> publish` gating을 전제로 한다.
 
 ### 5.3 검색은 exact match부터 시작한다
 
@@ -337,6 +344,9 @@ admin 구조나 작업 원칙이 바뀌면 아래도 같이 본다.
 - `docs/admin/README.md`
 - `docs/admin/authjs-admin-ui-adoption-design.md`
 - `docs/admin/authjs-admin-access-control-plan.md`
+- `docs/admin/authjs-admin-ui-phase-2-api-contracts.md`
+- `docs/admin/question-approval-thread-runbook.md`
+- `docs/admin/question-publish-rollback-runbook.md`
 
 ## 8. 새 admin 기능 추가 체크리스트
 

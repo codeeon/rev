@@ -16,6 +16,9 @@
 - `authjs-admin-ui-implementation-order.md`
 - `authjs-admin-ui-phase-1-checklist.md`
 - `authjs-admin-ui-phase-2-expansion-plan.md`
+- `authjs-admin-ui-phase-2-api-contracts.md`
+- `question-approval-thread-runbook.md`
+- `question-publish-rollback-runbook.md`
 
 ## 핵심 원칙
 
@@ -32,3 +35,7 @@
 4. 실제 파일 작업 순서가 필요하면 `authjs-admin-ui-implementation-order.md`
 5. PR/작업 체크리스트가 필요하면 `authjs-admin-ui-phase-1-checklist.md`
 6. 다중 관리자/통계/질문 수정 확장 계획은 `authjs-admin-ui-phase-2-expansion-plan.md`
+7. API 계약, draft 저장 단위, role matrix는 `authjs-admin-ui-phase-2-api-contracts.md`
+8. approval request 운영 절차는 `question-approval-thread-runbook.md`
+9. rollback 절차는 `question-publish-rollback-runbook.md`
+10. 새 세션으로 바로 이어갈 핸드오프는 `docs/session-handoff-2026-03-15-admin.md`

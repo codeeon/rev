@@ -68,10 +68,19 @@
 - [x] `pnpm build` 통과
 - [x] `pnpm ci:monorepo` 통과
 
-## 현재 남은 태스크
+## 운영 보류 태스크
 
 - [ ] 실제 Google OAuth env를 넣고 `/admin/login`부터 로그인 플로우 수동 확인
 - [ ] `ADMIN_ALLOWED_EMAILS` 운영값 등록
+
+위 2개는 실제 운영값이 준비된 뒤에 진행한다.
+
+## 다음 세션 권장 시작점
+
+- [x] `/admin/analytics` 화면 IA와 KPI 카드 스캐폴딩 추가
+- [x] `/admin/questions/[version]` read-only version 상세 화면 추가
+- [x] `/admin/questions/[version]/edit` draft 편집 골격 화면 추가
+- [x] 질문 version publish 확인 화면의 정보 구조 초안 추가
 
 ## 2차 확장 태스크 플랜
 
@@ -79,29 +88,39 @@
 
 ### 권한/역할 모델
 
-- [ ] Google OAuth 기반 다중 관리자 운영을 전제로 `viewer` / `editor` / `owner` 역할 모델 문서화
-- [ ] 역할별 접근 범위 매트릭스 정의
-- [ ] 조회 화면, 질문 수정 화면, 버전 배포 액션에 필요한 권한 경계 정리
+- [x] Google OAuth 기반 다중 관리자 운영을 전제로 `viewer` / `editor` / `owner` 역할 모델 문서화
+- [x] 역할별 접근 범위 매트릭스 정의
+- [x] 조회 화면, 질문 수정 화면, 버전 배포 액션에 필요한 권한 경계 정리
+- [x] `session.user.role`와 capability guard를 page/API에 연결
 - [ ] 초기에는 allowlist 기반으로 role을 둘지, 별도 admin 설정 저장소로 옮길지 결정
 
 ### 결과 통계 시각화
 
-- [ ] `/admin` 또는 별도 통계 화면에서 보여줄 핵심 KPI 정의
-- [ ] `questionVersion`, `birthTimeKnowledge`, `feedback`, `confidence` 기준 집계 항목 문서화
+- [x] `/admin` 또는 별도 통계 화면에서 보여줄 핵심 KPI 정의
+- [x] `questionVersion`, `birthTimeKnowledge`, `feedback`, `confidence` 기준 집계 항목 문서화
 - [ ] 시트 원본 조회와 별도 read model/집계 캐시 중 어떤 구조로 갈지 결정
-- [ ] 차트/테이블용 admin API 계약 초안 작성
+- [x] 차트/테이블용 admin API 계약 초안 작성
 
 ### 질문 수정 / 버전 관리
 
-- [ ] Questions 편집 화면의 정보 구조와 편집 단위 정의
+- [x] Questions 편집 화면의 정보 구조와 편집 단위 정의
+- [x] `QuestionDrafts` 기반 draft snapshot 생성/list/detail/update API 추가
+- [x] `draft -> review-ready` 상태 전이와 publish 화면 diff 연결
+- [x] `ApprovalRequests` 기반 `request -> approve/reject -> publish` 흐름 추가
+- [x] `review-ready` draft를 Questions 탭에 publish하는 mutation 추가
 - [ ] draft -> review -> publish 버전 워크플로 문서화
 - [ ] version bump 규칙, publishedAt, updatedBy, 변경 사유 필드 정의
 - [ ] 질문 수정 시 validation 규칙과 실패 처리 정책 정리
-- [ ] rollback 또는 이전 version 재배포 정책 결정
+- [x] rollback 또는 이전 version 재배포 정책 결정
 
 ### 운영 / 감사
 
-- [ ] 누가 질문을 수정하고 배포했는지 남기는 audit log 항목 정의
-- [ ] admin 접근 로그와 Sheets read/write 로그를 구분해서 남기는 방식 정리
+- [x] draft/update/publish mutation에 대한 기본 audit log event shape 추가
+- [x] capability denied / mutation event를 서버 audit log로 기록
+- [x] audit event를 `AdminAuditLog`에 append-only로 저장
+- [x] owner 전용 audit log 조회 화면과 API 추가
+- [x] publish 승인 코멘트를 `ApprovalLog` 전용 모델로 분리 저장하고 조회 화면/API 추가
+- [x] admin 접근 로그와 mutation 로그를 별도 audit sink로 분리 저장
+- [x] approval 기준 rollback publish와 runbook 추가
 - [ ] 다중 관리자 동시 수정 충돌 방지 정책 정의
-- [ ] 운영 변경 전 확인 절차와 배포 체크리스트 초안 작성
+- [x] 운영 변경 전 확인 절차와 배포 체크리스트 초안 작성

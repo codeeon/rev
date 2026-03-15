@@ -5,6 +5,7 @@
 - 이 문서는 phase 1 구현 순서다.
 - phase 1 완료 상태는 `authjs-admin-ui-phase-1-checklist.md`
 - phase 2 확장 작업은 `authjs-admin-ui-phase-2-expansion-plan.md`
+- 현재 phase 2 publish workflow는 `question-approval-thread-runbook.md`, `question-publish-rollback-runbook.md`를 기준으로 이어간다.
 
 이 문서는 `1차 admin UI`를 가장 낮은 리스크로 구현하기 위한 파일별 순서를 정리한다.
 

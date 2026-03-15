@@ -16,6 +16,39 @@
 
 이 문서는 `왜 이 구조가 필요한가`보다 `무엇을 어떤 순서로 만들 것인가`에 집중한다.
 
+## 1.1) 현재 작업 원칙
+
+현재 결정:
+
+- 관리자 인증/인가의 운영값 등록과 실로그인 검증은 뒤로 미룬다.
+- 다음 구현 우선순위는 `관리자 웹 정보 구조와 작업 흐름`이다.
+
+즉, 다음 세션에서는 아래를 먼저 진행한다.
+
+1. `/admin/analytics` read-only 대시보드
+2. 질문 version 상세 read-only 화면
+3. draft 편집 화면 골격
+4. publish 확인 화면 골격
+
+실제 Google OAuth 운영값 확인과 allowlist 운영 반영은 이 단계의 blocker가 아니다.
+
+2026-03-15 후속 반영:
+
+- 위 4개 화면 골격은 구현 완료
+- `analytics API 계약`, `draft 저장 단위`, `publish diff`, `role matrix` 초안도 코드/문서로 추가
+- `QuestionDrafts` schema/parser와 `GET/POST /api/admin/questions/drafts`도 추가
+- `GET/PATCH /api/admin/questions/drafts/[draftId]`, diff helper, edit 화면 연결도 추가
+- `PATCH /api/admin/questions/drafts/[draftId]/status`와 review-ready 전환, publish 화면 actual diff 연결도 추가
+- `POST /api/admin/questions/drafts/[draftId]/publish`와 실제 Questions snapshot publish도 추가
+- `session.user.role`와 capability guard, mutation audit log도 추가
+- `AdminAuditLog` durable append와 approval comment audit metadata도 추가
+- owner 전용 `/admin/audit`와 `/api/admin/audit` 조회도 추가
+- `ApprovalLog` durable append와 owner 전용 `/admin/approvals`, `/api/admin/approvals` 조회도 추가
+- `AdminAccessLog` / `AdminMutationLog` 분리 저장도 추가
+- `/api/admin/approvals/[approvalId]/rollback`과 `/admin/approvals` rollback action, rollback runbook도 추가
+- `ApprovalRequests` 기반 multi-step approval thread와 publish gating도 추가
+- 다음 작업 초점은 `durable role source`와 approval stale policy로 이동
+
 ## 2) 현재 상태 요약
 
 이미 구현된 범위:
@@ -23,17 +56,42 @@
 - Auth.js + Google provider + JWT session
 - `ADMIN_ALLOWED_EMAILS` 기반 1차 admin 인가
 - `/admin/results`, `/admin/questions`
+- `/admin/analytics`
+- `/admin/questions/[version]`
+- `/admin/questions/[version]/edit`
+- `/admin/questions/publish`
+- `/api/admin/analytics/summary`
+- `/api/admin/questions/drafts`
+- `/api/admin/questions/drafts/[draftId]`
+- `/api/admin/questions/drafts/[draftId]/status`
+- `/api/admin/questions/drafts/[draftId]/approval-requests`
+- `/api/admin/questions/drafts/[draftId]/publish`
+- `/api/admin/questions/approval-requests/[requestId]/status`
+- `/api/admin/questions/publish-preview`
+- `/api/admin/audit`
+- `/admin/audit`
+- `/api/admin/approvals`
+- `/admin/approvals`
+- `/api/admin/approvals/[approvalId]/rollback`
+- `AdminAccessLog` / `AdminMutationLog` 분리 저장
+- `session.user.role`
+- capability 기반 page/API guard
+- draft/update/publish/access-denied audit event
 - `sessionId`, `questionVersion`, `birthTimeKnowledge` exact filter
 - 최근 window 기반 bounded recent-scan 조회
 - 범위 없는 전체 Results 스캔 제거
 
 아직 없는 범위:
 
-- 역할 분리(`viewer`, `editor`, `owner`)
+- durable role source
 - 결과 통계 대시보드
-- 질문 수정 UI
 - draft/review/publish version workflow
-- audit log와 변경 승인 흐름
+- approval request stale / auto-expire 정책
+
+운영 보류 상태:
+
+- 실제 `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `ADMIN_ALLOWED_EMAILS` 운영값 미등록
+- `/admin/login` 실제 Google 로그인 수동 검증 미완료
 
 ## 3) 설계 전제
 
@@ -133,6 +191,29 @@
   - 변경 diff
   - 승인/배포 액션
 
+## 4.3 phase 2 첫 구현 슬라이스
+
+새 세션에서 바로 시작할 구현 순서:
+
+1. `/admin/analytics`
+   - KPI 카드
+   - version / birthTimeKnowledge / feedback 분포 카드 또는 표
+   - 차트 자리와 데이터 계약 스캐폴딩
+
+2. `/admin/questions/[version]`
+   - published version 상세
+   - 질문 메타데이터와 옵션 구조 read-only 표시
+
+3. `/admin/questions/[version]/edit`
+   - draft 편집 화면 골격
+   - 저장 버튼 대신 임시 form layout, validation summary 자리만 먼저 구성
+
+4. `/admin/questions/publish`
+   - publish 대상 요약
+   - diff / check list / action slot 배치
+
+이 순서는 인증 운영값이 없어도 UI/route/API 계약을 먼저 굳힐 수 있게 한다.
+
 ## 5) 작업 스트림
 
 ## 5.1 권한/역할 스트림
@@ -145,7 +226,7 @@
 ### 태스크
 
 - [ ] `viewer` / `editor` / `owner` 역할 정의
-- [ ] role 별 페이지/API 접근 매트릭스 작성
+- [x] role 별 페이지/API 접근 매트릭스 작성
 - [ ] `session.user.role` 또는 equivalent helper 설계
 - [ ] phase 2 초기 role 저장 방식 결정
   - 후보 A: env 기반 role map
@@ -179,10 +260,10 @@
 
 ### 태스크
 
-- [ ] KPI 정의와 우선순위 합의
+- [x] KPI 정의와 우선순위 합의
 - [ ] read model이 필요한 집계 항목 구분
-- [ ] chart/table 데이터 계약 초안 작성
-- [ ] `/api/admin/analytics/*` route 범위 정의
+- [x] chart/table 데이터 계약 초안 작성
+- [x] `/api/admin/analytics/*` route 범위 정의
 - [ ] 차트 라이브러리 사용 기준 정리
 - [ ] 큰 범위 집계를 위한 캐시 또는 pre-aggregation 필요성 평가
 - [ ] phase 2에서 허용할 시간 범위(`7d`, `30d`, `90d`) 결정
@@ -219,29 +300,31 @@
 
 ### 태스크
 
-- [ ] 질문 편집 단위 정의
+- [x] 질문 편집 단위 정의
   - question text
   - option text
   - `questionWeight`
   - role/category
   - `scoreMap`
   - active flag
-- [ ] draft 저장 방식 결정
+- [x] draft 저장 방식 결정
 - [ ] published version immutable 원칙 정의
-- [ ] diff 표현 방식 정의
+- [x] diff 표현 방식 정의
 - [ ] validation 규칙 문서화
   - 필수 role 누락
   - option index 중복
   - score map 형식 오류
   - version 충돌
-- [ ] publish 전 check list 정의
-- [ ] rollback / 재배포 정책 정의
+- [x] publish 전 check list 정의
+- [x] rollback / 재배포 정책 정의
+- [x] `ApprovalRequests` 기반 `request -> approve/reject -> publish` 흐름 연결
 
 ### 산출물
 
 - version state machine
 - validation 목록
 - publish/rollback runbook 초안
+- approval thread 운영 기준
 
 ## 5.4 운영 감사 / 변경 추적 스트림
 
@@ -273,6 +356,8 @@
 - 운영 로그 요구사항 표
 
 ## 6) 저장소/아키텍처 의사결정 포인트
+
+구체 계약 문서: `authjs-admin-ui-phase-2-api-contracts.md`
 
 ### 6.1 role 저장 위치
 
@@ -322,16 +407,35 @@
 
 ## 7) 권장 구현 순서
 
-1. role 모델 문서화
-2. analytics KPI와 집계 API 계약 문서화
-3. 질문 version workflow 문서화
-4. audit event spec 문서화
-5. role helper와 guard 구조 확장
-6. read-only analytics 화면 추가
-7. draft 질문 조회 구조 추가
-8. 질문 편집 UI 추가
-9. publish/rollback 액션 추가
-10. audit log 저장과 운영 runbook 마무리
+1. read-only admin web IA 확정
+2. `/admin/analytics` 화면 추가
+3. `/admin/questions/[version]` 상세 화면 추가
+4. `/admin/questions/[version]/edit` draft 편집 골격 추가
+5. `/admin/questions/publish` 확인 화면 골격 추가
+6. role 모델 문서화
+7. analytics KPI와 집계 API 계약 문서화
+8. 질문 version workflow 문서화
+9. audit event spec 문서화
+10. role helper와 guard 구조 확장
+11. draft 저장 / publish / rollback 액션 추가
+12. audit log 저장과 운영 runbook 마무리
+
+## 7.1) 새 세션 시작 체크
+
+새 세션에서 바로 작업할 때는 아래 문서를 먼저 본다.
+
+1. `docs/admin/authjs-admin-ui-phase-1-checklist.md`
+2. `docs/admin/authjs-admin-ui-phase-2-expansion-plan.md`
+3. `docs/admin/authjs-admin-ui-authoring-guide.md`
+
+그리고 첫 구현 타겟은 아래 중 하나로 잡는다.
+
+- `/admin/analytics`
+- `/admin/questions/[version]`
+- `/admin/questions/[version]/edit`
+- `/admin/questions/publish`
+
+인증 운영값 등록 작업은 이 흐름을 막지 않는다.
 
 ## 8) 완료 기준
 
