@@ -12,6 +12,12 @@
 
 이 문서는 `설계안`보다 `구현 규칙`에 가깝다.
 
+문서 역할:
+
+- 현재 구현/확장 규칙: 이 문서
+- phase 1 완료 상태: `authjs-admin-ui-phase-1-checklist.md`
+- phase 2 확장 태스크: `authjs-admin-ui-phase-2-expansion-plan.md`
+
 ## 현재 기준 구조
 
 ```text
@@ -200,7 +206,9 @@ Results 조회 API는 무제한 전체 목록 계약으로 만들지 않는다.
 현재 기준:
 
 - 기본 최근 `100`건
-- `sessionId` exact match만 지원
+- 기본 목록 조회는 최근 window만 뒤에서부터 제한적으로 읽는다
+- `sessionId`, `questionVersion`, `birthTimeKnowledge` exact match만 지원
+- 상세 `sessionId` 조회도 같은 bounded recent-scan 범위 안에서만 찾는다
 
 새 필터를 추가할 때는 먼저 이 질문을 본다.
 
@@ -272,6 +280,8 @@ admin UI는 브랜드 랜딩 페이지처럼 만들 필요가 없다.
 - 표 형식
 - raw JSON 상세
 - 명확한 empty/error state
+
+질문 수정, 통계 시각화, publish workflow처럼 조회를 넘어서는 기능은 1차 규칙만으로 확장하지 말고 `authjs-admin-ui-phase-2-expansion-plan.md`의 역할/감사/버전 정책을 먼저 확인한다.
 
 ### 5.3 검색은 exact match부터 시작한다
 

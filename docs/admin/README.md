@@ -1,6 +1,6 @@
 # Admin 문서 인덱스
 
-`docs/admin`은 Auth.js 기반 admin UI를 도입하기 위한 설계 문서를 모아둔 경로다.
+`docs/admin`은 Auth.js 기반 admin UI의 1차 도입과 2차 확장 계획 문서를 모아둔 경로다.
 
 대상:
 
@@ -15,6 +15,7 @@
 - `authjs-admin-ui-authoring-guide.md`
 - `authjs-admin-ui-implementation-order.md`
 - `authjs-admin-ui-phase-1-checklist.md`
+- `authjs-admin-ui-phase-2-expansion-plan.md`
 
 ## 핵심 원칙
 
@@ -30,3 +31,4 @@
 3. 실제 구현 규칙과 확장 기준은 `authjs-admin-ui-authoring-guide.md`
 4. 실제 파일 작업 순서가 필요하면 `authjs-admin-ui-implementation-order.md`
 5. PR/작업 체크리스트가 필요하면 `authjs-admin-ui-phase-1-checklist.md`
+6. 다중 관리자/통계/질문 수정 확장 계획은 `authjs-admin-ui-phase-2-expansion-plan.md`

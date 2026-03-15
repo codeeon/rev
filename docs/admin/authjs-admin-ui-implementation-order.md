@@ -1,5 +1,11 @@
 # Auth.js 기반 Admin UI 구현 순서
 
+메모:
+
+- 이 문서는 phase 1 구현 순서다.
+- phase 1 완료 상태는 `authjs-admin-ui-phase-1-checklist.md`
+- phase 2 확장 작업은 `authjs-admin-ui-phase-2-expansion-plan.md`
+
 이 문서는 `1차 admin UI`를 가장 낮은 리스크로 구현하기 위한 파일별 순서를 정리한다.
 
 ## 1) 앱 인증 추가

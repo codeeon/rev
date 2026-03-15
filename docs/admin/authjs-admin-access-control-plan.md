@@ -17,6 +17,8 @@
 - 조직/팀 동기화
 - 사용자 관리 UI
 
+위 비목표는 phase 1 기준이다. phase 2 role 기반 확장은 `authjs-admin-ui-phase-2-expansion-plan.md`에서 다룬다.
+
 ## 2) 권한 모델
 
 1차 권한 모델은 단순하다.
@@ -248,3 +250,16 @@ JWT에는 최소한 아래가 들어간다.
 - 관리자 이메일만 `/api/admin/*` 호출 가능
 - 권한 판별 로직이 한 곳에 모여 있다
 - allowlist 변경 시 코드 수정 없이 env만으로 반영 가능
+
+## 13) phase 2 접근 제어 메모
+
+다중 관리자 운영과 질문 수정/배포 기능이 들어가면 phase 1 allowlist만으로는 부족하다.
+
+다음 단계에서 필요한 것:
+
+- 역할 모델(`viewer`, `editor`, `owner`)
+- 역할별 page/API 권한 매트릭스
+- publish/rollback 같은 mutation 액션의 추가 보호
+- audit log에 사용자 이메일과 역할 기록
+
+세부 태스크는 `authjs-admin-ui-phase-2-expansion-plan.md`를 본다.

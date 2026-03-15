@@ -56,11 +56,13 @@ cp apps/web/.env.example apps/web/.env.local
 | `AUTH_GOOGLE_ID` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | Google OAuth client ID |
 | `AUTH_GOOGLE_SECRET` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | Google OAuth client secret |
 | `ADMIN_ALLOWED_EMAILS` | admin 사용 시 필수 | `apps/web/.env.local`, Vercel | admin 접근을 허용할 이메일 목록, 쉼표 구분 |
+| `AUTH_URL` | 로컬 `pnpm --filter web start` 검증 시 권장 | `apps/web/.env.local` | 예: `http://localhost:3000`, Auth.js host trust 및 callback URL 기준 |
 
 예시:
 
 ```env
 ADMIN_ALLOWED_EMAILS=owner@example.com,ops@example.com
+AUTH_URL=http://localhost:3000
 ```
 
 메모:
@@ -68,6 +70,7 @@ ADMIN_ALLOWED_EMAILS=owner@example.com,ops@example.com
 - `AUTH_SECRET`가 비어 있으면 Auth.js 세션이 안정적으로 동작하지 않는다.
 - `ADMIN_ALLOWED_EMAILS`는 서버에서만 읽는 allowlist다.
 - 이메일은 `trim + lowercase` 기준으로 비교한다.
+- `pnpm dev`에서는 대개 없어도 되지만, `pnpm --filter web start` 같은 production mode 로컬 검증에서는 `AUTH_URL`이 없으면 `UntrustedHost`가 발생할 수 있다.
 
 ### 3. GA / Sentry 공개 런타임 값
 
